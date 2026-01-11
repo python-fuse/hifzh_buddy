@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hifzh_buddy/models/surah.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
@@ -40,10 +41,14 @@ class SurahTile extends StatelessWidget {
 
   final Surah surah;
 
+  void onTap(BuildContext context) {
+    context.push('/surah/${surah.number}/1');
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: () => onTap(context),
       enableFeedback: true,
       child: SizedBox(
         width: double.infinity,
