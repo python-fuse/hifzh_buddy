@@ -5,6 +5,7 @@ class Surah {
   final String englishName;
   final String englishNameTranslation;
   final String revelationType;
+  final int number;
   final List<Ayah> ayahs;
 
   Surah({
@@ -13,6 +14,7 @@ class Surah {
     required this.englishNameTranslation,
     required this.revelationType,
     required this.ayahs,
+    required this.number,
   });
 
   factory Surah.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class Surah {
 
     return Surah(
       name: json['name'],
+      number: json['number'],
       englishName: json['englishName'],
       englishNameTranslation: json['englishNameTranslation'],
       revelationType: json['revelationType'],

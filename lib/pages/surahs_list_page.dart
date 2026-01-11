@@ -15,6 +15,7 @@ class SurahsListPage extends StatelessWidget {
         title: Text('All Surahs'),
         centerTitle: true,
         actions: [IconButton(icon: Icon(Icons.search), onPressed: () {})],
+        scrolledUnderElevation: 0,
       ),
 
       body: Padding(
