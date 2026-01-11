@@ -47,4 +47,4 @@ app.*.map.json
 
 
 # Quran Audio Files
-assets/ayahs
+assets/quranAudio
