@@ -16,12 +16,16 @@ class Surah {
   });
 
   factory Surah.fromJson(Map<String, dynamic> json) {
+    final ayahsJson = json['ayahs'] as List<dynamic>;
+
     return Surah(
       name: json['name'],
       englishName: json['englishName'],
       englishNameTranslation: json['englishNameTranslation'],
       revelationType: json['revelationType'],
-      ayahs: json['ayahs'].map((ayahJson) => Ayah.fromJson(ayahJson)).toList(),
+      ayahs: ayahsJson
+          .map((ayahJson) => Ayah.fromJson(ayahJson as Map<String, dynamic>))
+          .toList(),
     );
   }
 }

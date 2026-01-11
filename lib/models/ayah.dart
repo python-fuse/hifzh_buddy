@@ -1,14 +1,14 @@
 class Ayah {
-  final String globalNumber;
+  final int globalNumber;
   final String text;
-  final String numberInSurah;
+  final int numberInSurah;
   final String audioPath;
-  final String page;
-  final String juz;
-  final String manzil;
-  final String ruku;
-  final String hizbQuarter;
-  final String sajda;
+  final int page;
+  final int juz;
+  final int manzil;
+  final int ruku;
+  final int hizbQuarter;
+  final dynamic sajda;
 
   Ayah({
     required this.globalNumber,
@@ -24,6 +24,17 @@ class Ayah {
   });
 
   factory Ayah.fromJson(Map<String, dynamic> json) {
+    // sajda can be bool or Map
+    // "sajda": {
+    //       "id": 1,
+    //       "recommended": true,
+    //       "obligatory": false
+    //   }
+
+    final sajdaData = json['sajda'];
+
+    sajdaData is Map<String, dynamic>? ? sajdaData : false;
+
     return Ayah(
       globalNumber: json['number'],
       audioPath: json['audio'],
@@ -32,7 +43,7 @@ class Ayah {
       manzil: json['manzil'],
       ruku: json['ruku'],
       hizbQuarter: json['hizbQuarter'],
-      sajda: json['sajda'],
+      sajda: sajdaData,
       numberInSurah: json['numberInSurah'],
       text: json['text'],
     );
