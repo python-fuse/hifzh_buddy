@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:hifzh_buddy/models/surah.dart';
@@ -57,17 +58,15 @@ class _SurahPageState extends ConsumerState<SurahPage> {
                 );
               },
 
+              sp: 1.sp,
+              h: 1.h,
+
               onPageChanged: onPageChanged,
               controller: PageController(initialPage: widget.page - 1),
               pageBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
             ),
           ),
-
-          Container(
-            width: double.infinity,
-            height: MediaQuery.of(context).size.height * 0.08,
-            decoration: BoxDecoration(color: Colors.grey.shade300),
-          ),
+          FooterPlayer(),
         ],
       ),
     );
