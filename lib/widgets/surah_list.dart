@@ -1,37 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:hifzh_buddy/models/surah.dart';
+import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
 
-class SurahList extends StatelessWidget {
+class SurahList extends ConsumerWidget {
   SurahList({super.key});
 
   final Future<List<Surah>> surahsFuture = QuranUtils.loadSurahs();
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<Surah>>(
-      future: surahsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final surahsAsync = ref.watch(surahsProvider);
 
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
-        final surahs = snapshot.data ?? [];
-
-        return ListView.builder(
-          itemCount: surahs.length,
-          itemBuilder: (context, index) {
-            final surah = surahs[index];
-            return SurahTile(surah: surah);
-          },
-        );
-      },
+    return surahsAsync.when(
+      data: (surahs) => ListView.builder(
+        itemCount: surahs.length,
+        itemBuilder: (context, index) {
+          final surah = surahs[index];
+          return SurahTile(surah: surah);
+        },
+      ),
+      error: (err, stack) => Text(err.toString()),
+      loading: () => const Center(
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
     );
   }
 }
@@ -99,7 +98,11 @@ class SurahTile extends StatelessWidget {
 
                   Text(
                     surah.name.split(" ").sublist(1).join(" "),
-                    style: GoogleFonts.scheherazadeNew(fontSize: 20),
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontFamily: "UthmanicHafs",
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
