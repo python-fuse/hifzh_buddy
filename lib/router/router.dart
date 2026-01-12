@@ -1,11 +1,13 @@
 import 'package:go_router/go_router.dart';
 import 'package:hifzh_buddy/pages/home_page.dart';
+import 'package:hifzh_buddy/pages/splash_screen.dart';
 import 'package:hifzh_buddy/pages/surah_page.dart';
 import 'package:hifzh_buddy/pages/surahs_list_page.dart';
 
 final appRouter = GoRouter(
   routes: [
-    GoRoute(path: '/', builder: (ctx, state) => HomePage()),
+    GoRoute(path: '/', builder: (ctx, state) => SplashScreen()),
+    GoRoute(path: '/home', builder: (ctx, state) => HomePage()),
     GoRoute(path: '/list', builder: (ctx, state) => SurahsListPage()),
     GoRoute(
       path: '/surah/:number/:page',
