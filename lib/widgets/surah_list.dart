@@ -41,7 +41,7 @@ class SurahTile extends StatelessWidget {
   final Surah surah;
 
   void onTap(BuildContext context) {
-    context.push('/surah/${surah.number}/1');
+    context.push('/surah/${surah.number}/${surah.ayahs.first.page}');
   }
 
   @override

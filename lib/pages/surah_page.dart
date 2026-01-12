@@ -1,21 +1,74 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SurahPage extends StatefulWidget {
+import 'package:hifzh_buddy/models/surah.dart';
+import 'package:hifzh_buddy/providers/quran_data_provider.dart';
+import 'package:hifzh_buddy/uitls/quran_utils.dart';
+import 'package:qcf_quran/qcf_quran.dart';
+
+class SurahPage extends ConsumerStatefulWidget {
   final int surahNumber;
   final int page;
 
   const SurahPage({super.key, required this.surahNumber, required this.page});
 
   @override
-  State<SurahPage> createState() => _SurahPageState();
+  ConsumerState<SurahPage> createState() => _SurahPageState();
 }
 
-class _SurahPageState extends State<SurahPage> {
+class _SurahPageState extends ConsumerState<SurahPage> {
+  String? _currentTitle;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final List<Surah> surahs = ref.watch(surahsProvider).value!;
+    _currentTitle ??= QuranUtils.getSurah(
+      widget.surahNumber,
+      surahs,
+    ).englishName;
+
+    void onPageChanged(int page) {
+      final pageData = getPageData(page);
+      final newSurah = QuranUtils.getSurah(pageData.first['surah'], surahs);
+
+      setState(() {
+        _currentTitle = newSurah.englishName;
+      });
+    }
+
     return Scaffold(
-      body: Center(
-        child: Text("Surah ${widget.surahNumber} - Page ${widget.page}"),
+      appBar: AppBar(title: Text(_currentTitle!), centerTitle: true),
+      body: Column(
+        children: [
+          Expanded(
+            child: PageviewQuran(
+              onLongPress: (surahNumber, verseNumber) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      "Surah Number: $surahNumber, Verse Number: $verseNumber",
+                    ),
+                  ),
+                );
+              },
+
+              onPageChanged: onPageChanged,
+              controller: PageController(initialPage: widget.page - 1),
+              pageBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            ),
+          ),
+
+          Container(
+            width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.08,
+            decoration: BoxDecoration(color: Colors.grey.shade300),
+          ),
+        ],
       ),
     );
   }
