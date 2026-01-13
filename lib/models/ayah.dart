@@ -9,6 +9,7 @@ class Ayah {
   final int ruku;
   final int hizbQuarter;
   final dynamic sajda;
+  final int surahNumber;
 
   Ayah({
     required this.globalNumber,
@@ -21,6 +22,7 @@ class Ayah {
     required this.ruku,
     required this.hizbQuarter,
     required this.sajda,
+    required this.surahNumber,
   });
 
   factory Ayah.fromJson(Map<String, dynamic> json) {
@@ -46,6 +48,7 @@ class Ayah {
       sajda: sajdaData,
       numberInSurah: json['numberInSurah'],
       text: json['text'],
+      surahNumber: json['surahNumber'],
     );
   }
 }

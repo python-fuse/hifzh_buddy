@@ -37,7 +37,6 @@ dependencies:
   google_fonts: ^7.0.0
   go_router: ^17.0.1
   flutter_riverpod: ^3.1.0
-  qcf_quran: ^0.0.3
   just_audio: ^0.10.5
   flutter_screenutil: ^5.9.3
   audio_session: ^0.2.2

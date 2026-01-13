@@ -19,6 +19,11 @@ class Surah {
 
   factory Surah.fromJson(Map<String, dynamic> json) {
     final ayahsJson = json['ayahs'] as List<dynamic>;
+    final surahNumber = json['number'];
+
+    for (var ayahJson in ayahsJson) {
+      ayahJson['surahNumber'] = surahNumber;
+    }
 
     return Surah(
       name: json['name'],

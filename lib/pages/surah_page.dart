@@ -5,10 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hifzh_buddy/providers/audio_player_provider.dart';
 
 import 'package:hifzh_buddy/models/surah.dart';
+import 'package:hifzh_buddy/providers/current_verse_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
 import 'package:hifzh_buddy/widgets/footer_player.dart';
-import 'package:qcf_quran/qcf_quran.dart';
 import 'package:quran_library/quran_library.dart';
 
 class SurahPage extends ConsumerStatefulWidget {
@@ -43,15 +43,30 @@ class _SurahPageState extends ConsumerState<SurahPage> {
     void onPageChanged(int page) {
       log("page: $page");
 
-      final pageData = getPageData(page + 1);
-      final newSurah = QuranUtils.getSurah(pageData.first['surah'], surahs);
+      final pageData = QuranLibrary().getAllSurahInPageByPageNumber(
+        pageNumber: page + 1,
+      );
 
       setState(() {
-        _currentTitle = newSurah.englishName;
+        _currentTitle = pageData.first.englishName;
       });
 
       ref.read(audioPlayerProvider.notifier).loadPage(page + 1);
     }
+
+    final currentVerse = ref.watch(currentPlayingVerseProvider).ayah;
+
+    Map<int, List<int>> toBeHighlighted = {};
+
+    if (currentVerse != null) {
+      toBeHighlighted = {
+        currentVerse.surahNumber: [currentVerse.numberInSurah],
+      };
+    }
+
+    log(
+      "toBeHighlighted updated: $toBeHighlighted, verse: ${currentVerse?.numberInSurah}",
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(_currentTitle!), centerTitle: true),
@@ -60,11 +75,14 @@ class _SurahPageState extends ConsumerState<SurahPage> {
           Positioned.fill(
             child: QuranPagesScreen(
               parentContext: context,
+              ayahSelectedBackgroundColor: Theme.of(
+                context,
+              ).primaryColor.withAlpha(0x33),
               startPage: widget.page,
               useDefaultAppBar: false,
               endPage: 604,
-              fontsName: "UsmanicHafs",
               onPageChanged: onPageChanged,
+              highlightedAyahNumbersBySurah: toBeHighlighted,
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               onAyahLongPress: (details, ayah) {},
             ),

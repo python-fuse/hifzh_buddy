@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:hifzh_buddy/models/ayah.dart';
+import 'package:hifzh_buddy/providers/current_verse_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
 import 'package:just_audio/just_audio.dart';
@@ -15,9 +17,37 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
   final Ref ref;
   final AudioPlayer player = AudioPlayer();
 
+  List<Ayah> _pageAyahs = [];
+
   AudioPlayerNotifier(this.ref) : super(const AsyncValue.data(null)) {
     player.processingStateStream.listen((state) {
-      if (state == ProcessingState.completed) {}
+      if (state == ProcessingState.completed) {
+        ref
+            .read(currentPlayingVerseProvider.notifier)
+            .updateCurrentVerse(null, null);
+      }
+    });
+
+    player.currentIndexStream.listen((index) {
+      log("Current index changed to: $index, isPlaying: ${player.playing}");
+      log(
+        "Current playing before update: ${ref.read(currentPlayingVerseProvider).ayah?.numberInSurah}",
+      );
+
+      if (index != null && index < _pageAyahs.length) {
+        ref
+            .read(currentPlayingVerseProvider.notifier)
+            .updateCurrentVerse(_pageAyahs[index], index);
+        log(
+          "Current playing after update: ${ref.read(currentPlayingVerseProvider).ayah?.numberInSurah}",
+        );
+      } else {
+        ref
+            .read(currentPlayingVerseProvider.notifier)
+            .updateCurrentVerse(null, null);
+
+        player.pause();
+      }
     });
   }
 
@@ -29,11 +59,15 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
     player.clearAudioSources();
     player.pause();
 
-    final pageAyahs = QuranUtils.getPageAyahs(pageNumber, surahs);
+    ref
+        .read(currentPlayingVerseProvider.notifier)
+        .updateCurrentVerse(null, null);
+
+    _pageAyahs = QuranUtils.getPageAyahs(pageNumber, surahs);
 
     try {
       player.addAudioSources(
-        pageAyahs
+        _pageAyahs
             .map((a) => AudioSource.asset("assets/quranAudio/${a.audioPath}"))
             .toList(),
       );
@@ -41,7 +75,7 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
       state = AsyncValue.data(null);
 
       // data loaded
-      log(pageAyahs.map((a) => a.audioPath).join(", "));
+      log(_pageAyahs.map((a) => a.audioPath).join(", "));
       log(player.sequence.map((s) => s.tag).toString());
     } catch (e) {
       log(e.toString());
