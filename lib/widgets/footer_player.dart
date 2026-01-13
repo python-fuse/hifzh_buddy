@@ -21,7 +21,7 @@ class FooterPlayer extends ConsumerWidget {
 
         return Container(
           width: double.infinity,
-          height: 120,
+          height: 100,
           decoration: BoxDecoration(
             color: Colors.grey.shade100,
             borderRadius: const BorderRadius.only(

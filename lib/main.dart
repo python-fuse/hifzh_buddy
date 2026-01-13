@@ -3,8 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hifzh_buddy/router/router.dart';
 import 'package:hifzh_buddy/theme/theme.dart';
+import 'package:quran_library/quran_library.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await QuranLibrary.init();
   runApp(const ProviderScope(child: MyApp()));
 }
 

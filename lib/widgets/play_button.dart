@@ -11,7 +11,7 @@ class PlayButton extends StatefulWidget {
 }
 
 class _PlayButtonState extends State<PlayButton> {
-  double size = 70.0;
+  double size = 60.0;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +43,8 @@ class _PlayButtonState extends State<PlayButton> {
           ],
         ),
         child: widget.isPlaying
-            ? Icon(Icons.pause, color: Colors.white, size: 40)
-            : Icon(Icons.play_arrow, color: Colors.white, size: 40),
+            ? Icon(Icons.pause, color: Colors.white, size: 30)
+            : Icon(Icons.play_arrow, color: Colors.white, size: 30),
       ),
     );
   }

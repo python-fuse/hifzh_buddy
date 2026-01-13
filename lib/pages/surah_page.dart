@@ -1,13 +1,15 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hifzh_buddy/providers/audio_player_provider.dart';
-import 'package:qcf_quran/qcf_quran.dart';
 
 import 'package:hifzh_buddy/models/surah.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
 import 'package:hifzh_buddy/widgets/footer_player.dart';
+import 'package:qcf_quran/qcf_quran.dart';
+import 'package:quran_library/quran_library.dart';
 
 class SurahPage extends ConsumerStatefulWidget {
   final int surahNumber;
@@ -39,41 +41,41 @@ class _SurahPageState extends ConsumerState<SurahPage> {
     ).englishName;
 
     void onPageChanged(int page) {
-      final pageData = getPageData(page);
+      log("page: $page");
+
+      final pageData = getPageData(page + 1);
       final newSurah = QuranUtils.getSurah(pageData.first['surah'], surahs);
 
       setState(() {
         _currentTitle = newSurah.englishName;
       });
 
-      ref.read(audioPlayerProvider.notifier).loadPage(page);
+      ref.read(audioPlayerProvider.notifier).loadPage(page + 1);
     }
 
     return Scaffold(
       appBar: AppBar(title: Text(_currentTitle!), centerTitle: true),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: PageviewQuran(
-              onLongPress: (surahNumber, verseNumber) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      "Surah Number: $surahNumber, Verse Number: $verseNumber",
-                    ),
-                  ),
-                );
-              },
-
-              sp: 1.sp,
-              h: 1.h,
-
+          Positioned.fill(
+            child: QuranPagesScreen(
+              parentContext: context,
+              startPage: widget.page,
+              useDefaultAppBar: false,
+              endPage: 604,
+              fontsName: "UsmanicHafs",
               onPageChanged: onPageChanged,
-              controller: PageController(initialPage: widget.page - 1),
-              pageBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              onAyahLongPress: (details, ayah) {},
             ),
           ),
-          FooterPlayer(),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 80,
+            child: FooterPlayer(),
+          ),
         ],
       ),
     );

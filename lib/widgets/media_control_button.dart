@@ -19,8 +19,8 @@ class _MediaControlButtonState extends State<MediaControlButton> {
     return InkWell(
       onTap: widget.handleTap,
       child: Container(
-        height: 40,
-        width: 40,
+        height: 30,
+        width: 30,
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(100),
@@ -32,7 +32,7 @@ class _MediaControlButtonState extends State<MediaControlButton> {
             ),
           ],
         ),
-        child: Icon(widget.icon, size: 20, color: Colors.white),
+        child: Icon(widget.icon, size: 15, color: Colors.white),
       ),
     );
   }

@@ -26,6 +26,9 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
 
     final surahs = ref.read(surahsProvider).value ?? [];
 
+    player.clearAudioSources();
+    player.pause();
+
     final pageAyahs = QuranUtils.getPageAyahs(pageNumber, surahs);
 
     try {
@@ -38,7 +41,8 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
       state = AsyncValue.data(null);
 
       // data loaded
-      log("loaded");
+      log(pageAyahs.map((a) => a.audioPath).join(", "));
+      log(player.sequence.map((s) => s.tag).toString());
     } catch (e) {
       log(e.toString());
       state = AsyncValue.error(e.toString(), StackTrace.current);
