@@ -11,6 +11,8 @@ import 'package:hifzh_buddy/uitls/quran_utils.dart';
 import 'package:hifzh_buddy/widgets/footer_player.dart';
 import 'package:quran_library/quran_library.dart';
 
+// import getx
+
 class SurahPage extends ConsumerStatefulWidget {
   final int surahNumber;
   final int page;
@@ -55,8 +57,18 @@ class _SurahPageState extends ConsumerState<SurahPage> {
     }
 
     final currentVerse = ref.watch(currentPlayingVerseProvider).ayah;
-
     Map<int, List<int>> toBeHighlighted = {};
+    if (currentVerse != null) {
+      toBeHighlighted = {
+        currentVerse.surahNumber: [currentVerse.numberInSurah],
+      };
+    }
+
+    log(
+      "UI - toBeHighlighted: $toBeHighlighted, playing ayah: ${currentVerse?.numberInSurah}",
+    );
+
+    // Map<int, List<int>> toBeHighlighted = {};
 
     if (currentVerse != null) {
       toBeHighlighted = {
@@ -67,6 +79,16 @@ class _SurahPageState extends ConsumerState<SurahPage> {
     log(
       "toBeHighlighted updated: $toBeHighlighted, verse: ${currentVerse?.numberInSurah}",
     );
+
+    final combined = List<int>.empty(growable: true);
+    toBeHighlighted.forEach((surah, ayahs) {
+      for (final n in ayahs) {
+        final id = QuranCtrl.instance.getAyahUQBySurahAndAyah(surah, n);
+        if (id != null) combined.add(id);
+      }
+    });
+
+    QuranCtrl.instance.setExternalHighlights(combined);
 
     return Scaffold(
       appBar: AppBar(title: Text(_currentTitle!), centerTitle: true),
@@ -82,17 +104,36 @@ class _SurahPageState extends ConsumerState<SurahPage> {
               useDefaultAppBar: false,
               endPage: 604,
               onPageChanged: onPageChanged,
-              highlightedAyahNumbersBySurah: toBeHighlighted,
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               onAyahLongPress: (details, ayah) {},
             ),
           ),
+
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             height: 80,
             child: FooterPlayer(),
+          ),
+          Positioned(
+            top: 100,
+            left: 20,
+            child: Container(
+              padding: EdgeInsets.all(8),
+              color: Colors.black.withOpacity(0.7),
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final currentVerse = ref
+                      .watch(currentPlayingVerseProvider)
+                      .ayah;
+                  return Text(
+                    'STATE: ${currentVerse?.surahNumber ?? "none"}:${currentVerse?.numberInSurah ?? "none"}',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  );
+                },
+              ),
+            ),
           ),
         ],
       ),

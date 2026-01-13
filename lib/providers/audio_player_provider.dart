@@ -28,6 +28,11 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
       }
     });
 
+    player.positionStream.listen((position) {
+      final currentIndex = player.currentIndex;
+      log("positionStream - currentIndex from player: $currentIndex");
+    });
+
     player.currentIndexStream.listen((index) {
       log("Current index changed to: $index, isPlaying: ${player.playing}");
       log(
