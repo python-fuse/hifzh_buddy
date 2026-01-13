@@ -24,6 +24,9 @@ class _SurahPageState extends ConsumerState<SurahPage> {
 
   @override
   void initState() {
+    Future.microtask(() {
+      ref.read(audioPlayerProvider.notifier).loadPage(widget.page);
+    });
     super.initState();
   }
 
