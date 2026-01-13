@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qcf_quran/qcf_quran.dart';
 
 import 'package:hifzh_buddy/models/surah.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
-import 'package:qcf_quran/qcf_quran.dart';
+import 'package:hifzh_buddy/widgets/footer_player.dart';
 
 class SurahPage extends ConsumerStatefulWidget {
   final int surahNumber;
@@ -66,7 +67,7 @@ class _SurahPageState extends ConsumerState<SurahPage> {
               pageBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
             ),
           ),
-          FooterPlayer(),
+          FooterPlayer(currentPage: widget.page),
         ],
       ),
     );
