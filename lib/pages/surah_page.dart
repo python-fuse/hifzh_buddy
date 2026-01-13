@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hifzh_buddy/providers/audio_player_provider.dart';
 import 'package:qcf_quran/qcf_quran.dart';
 
 import 'package:hifzh_buddy/models/surah.dart';
@@ -41,6 +42,8 @@ class _SurahPageState extends ConsumerState<SurahPage> {
       setState(() {
         _currentTitle = newSurah.englishName;
       });
+
+      ref.read(audioPlayerProvider.notifier).loadPage(page);
     }
 
     return Scaffold(
@@ -67,7 +70,7 @@ class _SurahPageState extends ConsumerState<SurahPage> {
               pageBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
             ),
           ),
-          FooterPlayer(currentPage: widget.page),
+          FooterPlayer(),
         ],
       ),
     );
