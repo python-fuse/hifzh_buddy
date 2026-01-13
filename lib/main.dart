@@ -1,14 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hifzh_buddy/providers/audio_handler_provider.dart';
 import 'package:hifzh_buddy/router/router.dart';
 import 'package:hifzh_buddy/theme/theme.dart';
 import 'package:quran_library/quran_library.dart';
+import 'package:hifzh_buddy/service/audio_handler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await QuranLibrary.init();
-  runApp(const ProviderScope(child: MyApp()));
+
+  final audioHandler = await AudioService.init(
+    builder: () => QuranAudioHandler(AudioPlayer()),
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'com.example.hifzh_buddy.audio',
+      androidNotificationChannelName: 'Quran Audio',
+      androidNotificationOngoing: true,
+      androidStopForegroundOnPause: true,
+    ),
+  );
+
+  runApp(
+    ProviderScope(
+      overrides: [audioHandlerProvider.overrideWithValue(audioHandler)],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
