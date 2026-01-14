@@ -43,8 +43,6 @@ class _SurahPageState extends ConsumerState<SurahPage> {
     ).englishName;
 
     void onPageChanged(int page) {
-      log("page: $page");
-
       final pageData = QuranLibrary().getAllSurahInPageByPageNumber(
         pageNumber: page + 1,
       );
@@ -64,10 +62,6 @@ class _SurahPageState extends ConsumerState<SurahPage> {
       };
     }
 
-    log(
-      "UI - toBeHighlighted: $toBeHighlighted, playing ayah: ${currentVerse?.numberInSurah}",
-    );
-
     // Map<int, List<int>> toBeHighlighted = {};
 
     if (currentVerse != null) {
@@ -75,10 +69,6 @@ class _SurahPageState extends ConsumerState<SurahPage> {
         currentVerse.surahNumber: [currentVerse.numberInSurah],
       };
     }
-
-    log(
-      "toBeHighlighted updated: $toBeHighlighted, verse: ${currentVerse?.numberInSurah}",
-    );
 
     final combined = List<int>.empty(growable: true);
     toBeHighlighted.forEach((surah, ayahs) {
