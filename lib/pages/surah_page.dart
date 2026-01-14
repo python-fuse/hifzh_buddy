@@ -96,6 +96,10 @@ class _SurahPageState extends ConsumerState<SurahPage> {
               onPageChanged: onPageChanged,
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               onAyahLongPress: (details, ayah) {},
+              onSurahBannerPress: (surahNameModel) {},
+              onPagePress: () {},
+              secondMenuChildOnTap: (ayah) {},
+              anotherMenuChildOnTap: (ayah) {},
             ),
           ),
 
