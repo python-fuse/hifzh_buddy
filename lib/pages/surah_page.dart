@@ -116,25 +116,6 @@ class _SurahPageState extends ConsumerState<SurahPage> {
             height: 80,
             child: FooterPlayer(),
           ),
-          Positioned(
-            top: 100,
-            left: 20,
-            child: Container(
-              padding: EdgeInsets.all(8),
-              color: Colors.black.withOpacity(0.7),
-              child: Consumer(
-                builder: (context, ref, child) {
-                  final currentVerse = ref
-                      .watch(currentPlayingVerseProvider)
-                      .ayah;
-                  return Text(
-                    'STATE: ${currentVerse?.surahNumber ?? "none"}:${currentVerse?.numberInSurah ?? "none"}',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  );
-                },
-              ),
-            ),
-          ),
         ],
       ),
     );

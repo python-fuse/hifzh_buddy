@@ -4,7 +4,52 @@ import 'package:just_audio/just_audio.dart';
 class QuranAudioHandler extends BaseAudioHandler {
   final AudioPlayer audioPlayer;
 
-  QuranAudioHandler(this.audioPlayer);
+  QuranAudioHandler(this.audioPlayer) {
+    audioPlayer.playbackEventStream.listen(_broadcaseState);
+    audioPlayer.playerStateStream.listen((playerState) {});
+  }
+
+  void updateNowPlaying({
+    required String surahName,
+    required int ayahNumber,
+    required int pageNumber,
+  }) {
+    final mediaItem = MediaItem(
+      id: '$surahName:$ayahNumber',
+      title: "$surahName - $pageNumber ",
+      album: surahName,
+      artist: "Muhammad Siddiq Al-Minshawy",
+      artUri: Uri.parse(
+        "https://deenai.app/_next/image?url=%2Fblog%2Fblog%20image%209.jpg&w=384&q=75",
+      ),
+    );
+
+    this.mediaItem.add(mediaItem);
+  }
+
+  void _broadcaseState(PlaybackEvent event) {
+    final playing = audioPlayer.playing;
+
+    playbackState.add(
+      playbackState.value.copyWith(
+        controls: [
+          MediaControl.skipToPrevious,
+          if (playing) MediaControl.pause else MediaControl.play,
+          MediaControl.skipToNext,
+        ],
+        androidCompactActionIndices: const [0, 1, 2],
+        processingState: const {
+          ProcessingState.idle: AudioProcessingState.idle,
+          ProcessingState.loading: AudioProcessingState.loading,
+          ProcessingState.buffering: AudioProcessingState.buffering,
+          ProcessingState.ready: AudioProcessingState.ready,
+          ProcessingState.completed: AudioProcessingState.completed,
+        }[event.processingState]!,
+        playing: playing,
+        speed: audioPlayer.speed,
+      ),
+    );
+  }
 
   @override
   Future<void> play() {
