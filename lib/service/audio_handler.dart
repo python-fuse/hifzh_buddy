@@ -19,9 +19,6 @@ class QuranAudioHandler extends BaseAudioHandler {
       title: "$surahName - $pageNumber ",
       album: surahName,
       artist: "Muhammad Siddiq Al-Minshawy",
-      artUri: Uri.parse(
-        "https://deenai.app/_next/image?url=%2Fblog%2Fblog%20image%209.jpg&w=384&q=75",
-      ),
     );
 
     this.mediaItem.add(mediaItem);

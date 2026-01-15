@@ -10,8 +10,6 @@ import 'package:hifzh_buddy/widgets/footer_player.dart';
 import 'package:qcf_quran/qcf_quran.dart';
 import 'package:quran_library/quran_library.dart';
 
-// import getx
-
 class SurahPage extends ConsumerStatefulWidget {
   final int surahNumber;
   final int page;
@@ -106,10 +104,31 @@ class _SurahPageState extends ConsumerState<SurahPage> {
             left: 0,
             right: 0,
             height: 80,
-            child: FooterPlayer(),
+            child: FooterPlayer(
+              showModal: () => _showSessionSettingsBottomSheet(context),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  void _showSessionSettingsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true,
+      showDragHandle: true,
+      elevation: 1,
+      useSafeArea: true,
+      sheetAnimationStyle: AnimationStyle(
+        curve: Curves.bounceInOut,
+        duration: const Duration(milliseconds: 400),
+      ),
+
+      builder: (BuildContext context) {
+        return Container();
+      },
     );
   }
 }

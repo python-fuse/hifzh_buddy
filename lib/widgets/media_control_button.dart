@@ -16,23 +16,19 @@ class MediaControlButton extends StatefulWidget {
 class _MediaControlButtonState extends State<MediaControlButton> {
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: widget.handleTap,
-      child: Container(
-        height: 30,
-        width: 30,
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
-          borderRadius: BorderRadius.circular(100),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
-              blurRadius: 5,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Icon(widget.icon, size: 15, color: Colors.white),
+    return IconButton.filled(
+      onPressed: widget.handleTap,
+
+      constraints: BoxConstraints(),
+      icon: Icon(widget.icon, size: 15),
+      style: IconButton.styleFrom(
+        backgroundColor: Theme.of(context).primaryColor,
+        fixedSize: Size(30, 30),
+        shape: const CircleBorder(),
+
+        disabledBackgroundColor: Theme.of(
+          context,
+        ).primaryColor.withValues(alpha: 0.5),
       ),
     );
   }
