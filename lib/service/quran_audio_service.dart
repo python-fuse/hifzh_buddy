@@ -51,7 +51,6 @@ class QuranAudioService {
   Future<void> _cacheInBg(Reciter reciter, Ayah ayah) async {
     try {
       await _downloadService.downloadVerse(ayah: ayah, reciter: reciter);
-      log("Cached: ${reciter.englishName} - Ayah ${ayah.globalNumber}");
     } catch (e) {
       log(
         "Failed to cache ${reciter.englishName} - Ayah ${ayah.globalNumber}.Please download from download manager",

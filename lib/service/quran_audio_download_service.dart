@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -16,17 +17,21 @@ class QuranDownloadService {
     final url = reciter.getRemoteUrl(ayah.globalNumber);
     final savePath = await _getFullCachePath(reciter, ayah);
 
-    // Craete the directory forthe reciter if it doesnt exist
+    // Create directory if it doesn't exist
     final file = File(savePath);
-    await file.parent.create(recursive: true);
+
+    // Check if parent exists
+    if (!await file.parent.exists()) {
+      await file.parent.create(recursive: true);
+    }
 
     // Download
     await dio.download(
       url,
       savePath,
-      onReceiveProgress: (recieved, total) {
-        if (total != 1 && onProgress != null) {
-          onProgress(recieved / total);
+      onReceiveProgress: (received, total) {
+        if (total != -1 && onProgress != null) {
+          onProgress(received / total);
         }
       },
     );
@@ -43,6 +48,9 @@ class QuranDownloadService {
 
   Future<String> _getFullCachePath(Reciter reciter, Ayah ayah) async {
     final dir = await getApplicationDocumentsDirectory();
-    return '$dir/${reciter.getCachedAudiopath(ayah.globalNumber)}';
+    final fullPath =
+        '${dir.path}/${reciter.getCachedAudiopath(ayah.globalNumber)}';
+    log('Cache path: $fullPath'); // Add this
+    return fullPath;
   }
 }

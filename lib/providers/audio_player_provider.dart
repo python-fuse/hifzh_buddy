@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:hifzh_buddy/models/ayah.dart';
 import 'package:hifzh_buddy/providers/audio_handler_provider.dart';
 import 'package:hifzh_buddy/providers/current_verse_provider.dart';
+import 'package:hifzh_buddy/providers/quran_audio_service_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
 import 'package:just_audio/just_audio.dart';
@@ -64,6 +65,8 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
 
     final surahs = ref.read(surahsProvider).value ?? [];
+    final quranAudioService = ref.read(quranAudioServiceProvider);
+    final reciter = ref.watch(selectedReciterProvider);
 
     player.clearAudioSources();
     player.pause();
@@ -75,12 +78,25 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
     _pageAyahs = QuranUtils.getPageAyahsFromLibrary(pageNumber, surahs);
 
     try {
-      player.addAudioSources(
-        _pageAyahs
-            .map((a) => AudioSource.asset("assets/quranAudio/${a.audioPath}"))
-            .toList(),
+      final audioSources = await Future.wait(
+        _pageAyahs.map((a) async {
+          final audioPath = await quranAudioService.getAudioPath(
+            reciter,
+            a,
+            true,
+          );
+
+          if (audioPath.startsWith("http")) {
+            return AudioSource.uri(Uri.parse(audioPath));
+          } else if (audioPath.startsWith("assets/")) {
+            return AudioSource.asset(audioPath);
+          } else {
+            return AudioSource.file(audioPath);
+          }
+        }),
       );
 
+      player.addAudioSources(audioSources);
       state = AsyncValue.data(null);
     } catch (e) {
       state = AsyncValue.error(e.toString(), StackTrace.current);

@@ -9,10 +9,10 @@ class Reciter {
     required this.englishName,
   });
 
-  bool get isBundled => id == 'local.minshawy';
+  bool get isBundled => id == 'local.minshawi';
 
   String getRemoteUrl(int ayahNumber) {
-    return 'https://cdn.islamic.network/quran/audio/64/ar.husary/$ayahNumber.mp3';
+    return 'https://cdn.islamic.network/quran/audio/64/$id/$ayahNumber.mp3';
   }
 
   String getBundledAudioPath(String audioFilename) {
