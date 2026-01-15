@@ -54,31 +54,27 @@ class _SurahPageState extends ConsumerState<SurahPage> {
       ref.read(audioPlayerProvider.notifier).loadPage(page + 1);
     }
 
-    final currentVerse = ref.watch(currentPlayingVerseProvider).ayah;
-    Map<int, List<int>> toBeHighlighted = {};
-    if (currentVerse != null) {
-      toBeHighlighted = {
-        currentVerse.surahNumber: [currentVerse.numberInSurah],
-      };
-    }
-
-    // Map<int, List<int>> toBeHighlighted = {};
-
-    if (currentVerse != null) {
-      toBeHighlighted = {
-        currentVerse.surahNumber: [currentVerse.numberInSurah],
-      };
-    }
-
-    final combined = List<int>.empty(growable: true);
-    toBeHighlighted.forEach((surah, ayahs) {
-      for (final n in ayahs) {
-        final id = QuranCtrl.instance.getAyahUQBySurahAndAyah(surah, n);
-        if (id != null) combined.add(id);
+    void setHighlights() {
+      final currentVerse = ref.watch(currentPlayingVerseProvider).ayah;
+      Map<int, List<int>> toBeHighlighted = {};
+      if (currentVerse != null) {
+        toBeHighlighted = {
+          currentVerse.surahNumber: [currentVerse.numberInSurah],
+        };
       }
-    });
 
-    QuranCtrl.instance.setExternalHighlights(combined);
+      final combined = List<int>.empty(growable: true);
+      toBeHighlighted.forEach((surah, ayahs) {
+        for (final n in ayahs) {
+          final id = QuranCtrl.instance.getAyahUQBySurahAndAyah(surah, n);
+          if (id != null) combined.add(id);
+        }
+      });
+
+      QuranCtrl.instance.setExternalHighlights(combined);
+    }
+
+    setHighlights();
 
     return Scaffold(
       appBar: AppBar(title: Text(_currentTitle!), centerTitle: true),

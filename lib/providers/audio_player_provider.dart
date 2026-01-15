@@ -74,7 +74,7 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
         .read(currentPlayingVerseProvider.notifier)
         .updateCurrentVerse(null, null);
 
-    _pageAyahs = QuranUtils.getPageAyahs(pageNumber, surahs);
+    _pageAyahs = QuranUtils.getPageAyahsFromLibrary(pageNumber, surahs);
 
     try {
       player.addAudioSources(
