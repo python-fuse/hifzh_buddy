@@ -18,6 +18,8 @@ class FooterPlayer extends ConsumerWidget {
       builder: (ctx, snapshot) {
         final playerState = snapshot.data;
         final isPlaying = playerState?.playing ?? false;
+        final isCompleted =
+            playerState?.processingState == ProcessingState.completed;
 
         return Container(
           width: double.infinity,
@@ -51,7 +53,7 @@ class FooterPlayer extends ConsumerWidget {
                   ),
                   PlayButton(
                     onTap: () => isPlaying ? player.pause() : player.play(),
-                    isPlaying: isPlaying,
+                    isPlaying: isPlaying && !isCompleted,
                   ),
                   MediaControlButton(
                     icon: Icons.fast_forward,
