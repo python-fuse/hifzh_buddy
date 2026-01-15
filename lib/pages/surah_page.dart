@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hifzh_buddy/providers/audio_player_provider.dart';
@@ -9,6 +7,7 @@ import 'package:hifzh_buddy/providers/current_verse_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
 import 'package:hifzh_buddy/widgets/footer_player.dart';
+import 'package:qcf_quran/qcf_quran.dart';
 import 'package:quran_library/quran_library.dart';
 
 // import getx
@@ -44,58 +43,61 @@ class _SurahPageState extends ConsumerState<SurahPage> {
 
     void onPageChanged(int page) {
       final pageData = QuranLibrary().getAllSurahInPageByPageNumber(
-        pageNumber: page + 1,
+        pageNumber: page,
       );
 
       setState(() {
         _currentTitle = pageData.first.englishName;
       });
 
-      ref.read(audioPlayerProvider.notifier).loadPage(page + 1);
+      ref.read(audioPlayerProvider.notifier).loadPage(page);
     }
 
-    void setHighlights() {
+    handleHighlightVerse(surahNumber, verseNumber) {
       final currentVerse = ref.watch(currentPlayingVerseProvider).ayah;
-      Map<int, List<int>> toBeHighlighted = {};
       if (currentVerse != null) {
-        toBeHighlighted = {
-          currentVerse.surahNumber: [currentVerse.numberInSurah],
-        };
-      }
-
-      final combined = List<int>.empty(growable: true);
-      toBeHighlighted.forEach((surah, ayahs) {
-        for (final n in ayahs) {
-          final id = QuranCtrl.instance.getAyahUQBySurahAndAyah(surah, n);
-          if (id != null) combined.add(id);
+        if (currentVerse.surahNumber == surahNumber &&
+            currentVerse.numberInSurah == verseNumber) {
+          return Theme.of(context).primaryColor.withAlpha(0x33);
         }
-      });
-
-      QuranCtrl.instance.setExternalHighlights(combined);
+      }
+      return null;
     }
 
-    setHighlights();
+    // void setHighlights() {
+    //   final currentVerse = ref.watch(currentPlayingVerseProvider).ayah;
+    //   Map<int, List<int>> toBeHighlighted = {};
+    //   if (currentVerse != null) {
+    //     toBeHighlighted = {
+    //       currentVerse.surahNumber: [currentVerse.numberInSurah],
+    //     };
+    //   }
+
+    //   final combined = List<int>.empty(growable: true);
+    //   toBeHighlighted.forEach((surah, ayahs) {
+    //     for (final n in ayahs) {
+    //       final id = QuranCtrl.instance.getAyahUQBySurahAndAyah(surah, n);
+    //       if (id != null) combined.add(id);
+    //     }
+    //   });
+
+    //   QuranCtrl.instance.setExternalHighlights(combined);
+    // }
+
+    // setHighlights();
 
     return Scaffold(
       appBar: AppBar(title: Text(_currentTitle!), centerTitle: true),
       body: Stack(
         children: [
           Positioned.fill(
-            child: QuranPagesScreen(
-              parentContext: context,
-              ayahSelectedBackgroundColor: Theme.of(
-                context,
-              ).primaryColor.withAlpha(0x33),
-              startPage: widget.page,
-              useDefaultAppBar: false,
-              endPage: 604,
-              onPageChanged: onPageChanged,
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              onAyahLongPress: (details, ayah) {},
-              onSurahBannerPress: (surahNameModel) {},
-              onPagePress: () {},
-              secondMenuChildOnTap: (ayah) {},
-              anotherMenuChildOnTap: (ayah) {},
+            child: Consumer(
+              builder: (context, ref, child) => PageviewQuran(
+                initialPageNumber: widget.page,
+                pageBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                verseBackgroundColor: handleHighlightVerse,
+                onPageChanged: onPageChanged,
+              ),
             ),
           ),
 
