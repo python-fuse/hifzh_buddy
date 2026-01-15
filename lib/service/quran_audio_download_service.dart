@@ -1,0 +1,48 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:hifzh_buddy/models/ayah.dart';
+import 'package:hifzh_buddy/models/reciter.dart';
+import 'package:path_provider/path_provider.dart';
+
+class QuranDownloadService {
+  final Dio dio = Dio();
+
+  Future<void> downloadVerse({
+    required Ayah ayah,
+    required Reciter reciter,
+    Function(double)? onProgress,
+  }) async {
+    final url = reciter.getRemoteUrl(ayah.globalNumber);
+    final savePath = await _getFullCachePath(reciter, ayah);
+
+    // Craete the directory forthe reciter if it doesnt exist
+    final file = File(savePath);
+    await file.parent.create(recursive: true);
+
+    // Download
+    await dio.download(
+      url,
+      savePath,
+      onReceiveProgress: (recieved, total) {
+        if (total != 1 && onProgress != null) {
+          onProgress(recieved / total);
+        }
+      },
+    );
+  }
+
+  // Check if file is already cached
+  Future<bool> isFileCached({
+    required Ayah ayah,
+    required Reciter reciter,
+  }) async {
+    final path = await _getFullCachePath(reciter, ayah);
+    return await File(path).exists();
+  }
+
+  Future<String> _getFullCachePath(Reciter reciter, Ayah ayah) async {
+    final dir = await getApplicationDocumentsDirectory();
+    return '$dir/${reciter.getCachedAudiopath(ayah.globalNumber)}';
+  }
+}
