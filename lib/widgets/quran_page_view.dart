@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 
-class QuranPageView extends StatefulWidget {
-  const QuranPageView({super.key});
+class QuranPageView extends StatelessWidget {
+  final int page;
+  const QuranPageView({super.key, required this.page});
 
-  @override
-  State<QuranPageView> createState() => _QuranPageViewState();
-}
-
-class _QuranPageViewState extends State<QuranPageView> {
   final double originalWidth = 1260;
 
   @override
@@ -16,12 +12,19 @@ class _QuranPageViewState extends State<QuranPageView> {
       body: Center(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            double scale = constraints.maxWidth / originalWidth;
+            // double scale = constraints.maxWidth / originalWidth;
 
-            return Image.asset(
-              "assets/pages/page001.png",
-              fit: BoxFit.contain,
-              width: constraints.maxWidth,
+            return PageView.builder(
+              itemCount: 604,
+              scrollDirection: Axis.horizontal,
+              reverse: true,
+              itemBuilder: (context, index) {
+                return Image.asset(
+                  "assets/pages/page${(index + page).toString().padLeft(3, '0')}.png",
+                  fit: BoxFit.contain,
+                  width: constraints.maxWidth,
+                );
+              },
             );
           },
         ),

@@ -1,72 +1,46 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:go_router/go_router.dart';
 import 'package:hifzh_buddy/models/surah.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
+import 'package:hifzh_buddy/uitls/quran_utils.dart';
 
-class SurahList extends ConsumerStatefulWidget {
-  const SurahList({super.key});
+class PagesList extends ConsumerStatefulWidget {
+  const PagesList({super.key});
 
   @override
-  ConsumerState<SurahList> createState() => _SurahListState();
+  ConsumerState<PagesList> createState() => _PagesState();
 }
 
-class _SurahListState extends ConsumerState<SurahList> {
+class _PagesState extends ConsumerState<PagesList> {
   @override
   Widget build(BuildContext context) {
-    final surahs = ref.watch(surahsProvider).value!;
-
-    final searchTerm = ref.watch(searchTermProvider);
-
-    log("rec $searchTerm");
-
-    if (searchTerm.isEmpty) {
-      return ListView.builder(
-        itemCount: surahs.length,
-        itemBuilder: (context, index) {
-          final surah = surahs[index];
-          return SurahTile(surah: surah);
-        },
-      );
-    }
-
-    final filteredSurahs = surahs
-        .where(
-          (s) =>
-              s.englishName.toLowerCase().contains(searchTerm.toLowerCase()) ||
-              s.englishNameTranslation.toLowerCase().contains(
-                searchTerm.toLowerCase(),
-              ) ||
-              s.name.toLowerCase().contains(searchTerm.toLowerCase()),
-        )
-        .toList();
+    final surahs = ref.read(surahsProvider).value!;
 
     return ListView.builder(
-      itemCount: filteredSurahs.length,
+      itemCount: 604,
       itemBuilder: (context, index) {
-        final surah = filteredSurahs[index];
-        return SurahTile(surah: surah);
+        return PageTile(page: index + 1, surahs: surahs);
       },
     );
   }
 }
 
-class SurahTile extends StatelessWidget {
-  const SurahTile({super.key, required this.surah});
+class PageTile extends StatelessWidget {
+  final int page;
+  final List<Surah> surahs;
+  const PageTile({super.key, required this.page, required this.surahs});
 
-  final Surah surah;
-
-  void onTap(BuildContext context) {
-    context.push('/surah/${surah.number}/${surah.ayahs.first.page}');
+  void onTap(BuildContext context, int surahNumber, int page) {
+    context.push('/surah/$surahNumber/$page');
   }
 
   @override
   Widget build(BuildContext context) {
+    final surahsInPage = QuranUtils.getAllSurahsByPage(page, surahs);
+
     return InkWell(
-      onTap: () => onTap(context),
+      onTap: () => onTap(context, surahsInPage.first.number, page),
       enableFeedback: true,
       child: SizedBox(
         width: double.infinity,
@@ -85,7 +59,7 @@ class SurahTile extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  surah.number.toString().padLeft(2, '0'),
+                  page.toString().padLeft(2, '0'),
                   style: TextStyle(
                     fontSize: 18,
                     color: Theme.of(context).colorScheme.primary,
@@ -96,7 +70,6 @@ class SurahTile extends StatelessWidget {
               ),
             ),
 
-            // Row
             Flexible(
               flex: 1,
               child: Row(
@@ -107,18 +80,23 @@ class SurahTile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(surah.englishName, style: TextStyle(fontSize: 20)),
                       Text(
-                        "${surah.englishNameTranslation} ⊙ ${surah.ayahs.length} Ayahs",
-                        style: TextStyle(fontSize: 12),
+                        "${surahsInPage.first.englishNameTranslation} ${surahsInPage.last.englishNameTranslation == surahsInPage.first.englishNameTranslation ? "" : "- ${surahsInPage.last.englishNameTranslation}"}",
+                        style: TextStyle(fontSize: 10),
+                      ),
+
+                      // from first surah first verse to last surah last verse
+                      Text(
+                        "${surahsInPage.first.ayahs.firstWhere((a) => a.page == page).numberInSurah} - ${surahsInPage.last.ayahs.lastWhere((a) => a.page == page).numberInSurah}",
+                        style: TextStyle(fontSize: 20),
                       ),
                     ],
                   ),
 
                   Text(
-                    surah.name.split(" ").sublist(1).join(" "),
+                    "${surahsInPage.first.name.split(" ").sublist(1).join("").replaceAll("\u0633\u064f\u0648\u0631\u064e\u0629\u064f", "")} ${surahsInPage.last.name == surahsInPage.first.name ? "" : "- ${surahsInPage.last.name.replaceAll("\u0633\u064f\u0648\u0631\u064e\u0629\u064f", "")}"}",
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 18,
                       fontFamily: "UthmanicHafs",
                       fontWeight: FontWeight.w600,
                     ),

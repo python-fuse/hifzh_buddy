@@ -1,12 +1,15 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hifzh_buddy/providers/quran_data_provider.dart';
+import 'package:hifzh_buddy/widgets/pages_list.dart';
 import 'package:hifzh_buddy/widgets/search_input.dart';
 import 'package:hifzh_buddy/widgets/surah_list.dart';
 import 'package:hifzh_buddy/widgets/tabb_button.dart';
 
 class SurahsListPage extends StatelessWidget {
-  SurahsListPage({super.key});
-
-  final TextEditingController _searchController = TextEditingController();
+  const SurahsListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +27,24 @@ class SurahsListPage extends StatelessWidget {
           children: [
             SizedBox(width: double.infinity, child: TabbButton()),
             SizedBox(height: 16),
-            SearchInput(controller: _searchController),
+            SearchInput(),
 
             SizedBox(height: 16),
 
             // Render list of Surahs here
-            Expanded(child: SurahList()),
+            Consumer(
+              builder: (context, ref, child) {
+                final activeTab = ref.watch(activeTabProvider);
+
+                log('ac $activeTab');
+
+                if (activeTab.contains('surah')) {
+                  return Expanded(child: SurahList());
+                } else {
+                  return Expanded(child: PagesList());
+                }
+              },
+            ),
           ],
         ),
       ),

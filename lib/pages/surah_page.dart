@@ -87,6 +87,7 @@ class _SurahPageState extends ConsumerState<SurahPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(_currentTitle!), centerTitle: true),
+
       body: Stack(
         children: [
           Positioned.fill(
@@ -98,6 +99,7 @@ class _SurahPageState extends ConsumerState<SurahPage> {
                 onPageChanged: onPageChanged,
               ),
             ),
+            // child: QuranPageView(page: widget.page),
           ),
 
           Positioned(

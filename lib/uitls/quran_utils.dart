@@ -66,6 +66,12 @@ class QuranUtils {
     return pageAyahs;
   }
 
+  static List<Surah> getAllSurahsByPage(int pageNumber, List<Surah> surahs) {
+    return surahs
+        .where((s) => s.ayahs.any((a) => a.page == pageNumber))
+        .toList();
+  }
+
   /*
   ** getSurahByPage
   ** Gets the surah by page number

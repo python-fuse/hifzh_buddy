@@ -29,6 +29,14 @@ class Reciter {
     name: "محمد صديق المنشاوي",
     englishName: "Muhammad Siddiq Al-Minshawy",
   );
+
+  factory Reciter.fromJson(Map<String, dynamic> json) {
+    return Reciter(
+      id: json['identifier'],
+      name: json['name'],
+      englishName: json['englishName'],
+    );
+  }
 }
 
 enum AudioSourceType { bundled, cached, streaming }

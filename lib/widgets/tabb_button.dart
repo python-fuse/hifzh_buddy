@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 
-class TabbButton extends StatefulWidget {
+class TabbButton extends ConsumerStatefulWidget {
   const TabbButton({super.key});
 
   @override
-  State<TabbButton> createState() => _TabbButtonState();
+  ConsumerState<TabbButton> createState() => _TabbButtonState();
 }
 
-class _TabbButtonState extends State<TabbButton> {
-  String selectedValue = 'surah';
-
+class _TabbButtonState extends ConsumerState<TabbButton> {
   @override
   Widget build(BuildContext context) {
+    final selectedValue = ref.watch(activeTabProvider);
+
     void onSelectionChanged(Set<String> newSelection) {
-      setState(() {
-        selectedValue = newSelection.first;
-      });
+      ref.read(activeTabProvider.notifier).state = newSelection;
     }
 
     return SegmentedButton<String>(
@@ -23,7 +23,7 @@ class _TabbButtonState extends State<TabbButton> {
         ButtonSegment(value: 'surah', label: Text('Surah')),
         ButtonSegment(value: 'pages', label: Text('Pages')),
       ],
-      selected: selectedValue == 'surah' ? {'surah'} : {'pages'},
+      selected: selectedValue,
       onSelectionChanged: onSelectionChanged,
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.resolveWith((states) {
