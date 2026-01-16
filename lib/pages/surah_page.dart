@@ -6,6 +6,7 @@ import 'package:hifzh_buddy/models/surah.dart';
 import 'package:hifzh_buddy/providers/current_verse_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
+import 'package:hifzh_buddy/widgets/bottom_settings.dart';
 import 'package:hifzh_buddy/widgets/footer_player.dart';
 import 'package:qcf_quran/qcf_quran.dart';
 import 'package:quran_library/quran_library.dart';
@@ -125,9 +126,15 @@ class _SurahPageState extends ConsumerState<SurahPage> {
         curve: Curves.bounceInOut,
         duration: const Duration(milliseconds: 400),
       ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(8),
+          topRight: Radius.circular(8),
+        ),
+      ),
 
       builder: (BuildContext context) {
-        return Container();
+        return BottomSettings();
       },
     );
   }

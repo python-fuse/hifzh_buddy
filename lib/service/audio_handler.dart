@@ -13,12 +13,13 @@ class QuranAudioHandler extends BaseAudioHandler {
     required String surahName,
     required int ayahNumber,
     required int pageNumber,
+    required String reciterName,
   }) {
     final mediaItem = MediaItem(
       id: '$surahName:$ayahNumber',
-      title: "$surahName - $pageNumber ",
+      title: "$surahName - $ayahNumber ",
       album: surahName,
-      artist: "Muhammad Siddiq Al-Minshawy",
+      artist: reciterName,
     );
 
     this.mediaItem.add(mediaItem);

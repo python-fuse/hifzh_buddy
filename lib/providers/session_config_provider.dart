@@ -1,0 +1,50 @@
+import 'package:flutter_riverpod/legacy.dart';
+import 'package:hifzh_buddy/models/session_config.dart';
+
+class SessionConfigNotifier extends StateNotifier<SessionConfig> {
+  SessionConfigNotifier()
+    : super(
+        const SessionConfig(
+          startSurah: 1,
+          startVerse: 1,
+          endSurah: 1,
+          endVerse: 1,
+          playbackSpeed: 1.0,
+          verseReps: 1,
+          rangeReps: 1,
+        ),
+      );
+
+  void updateStartSurah(int surahNumber) {
+    state = state.copyWith(startSurah: surahNumber, startVerse: 1);
+  }
+
+  void updateStartVerse(int verseNumber) {
+    state = state.copyWith(startVerse: verseNumber);
+  }
+
+  void updateEndSurah(int surahNumber, int maxVerses) {
+    state = state.copyWith(endSurah: surahNumber, endVerse: maxVerses);
+  }
+
+  void updateEndVerse(int verseNumber) {
+    state = state.copyWith(endVerse: verseNumber);
+  }
+
+  void updatePlaybackSpeed(double speed) {
+    state = state.copyWith(playbackSpeed: speed);
+  }
+
+  void updateVerseReps(int reps) {
+    state = state.copyWith(verseReps: reps);
+  }
+
+  void updateRangeReps(int reps) {
+    state = state.copyWith(rangeReps: reps);
+  }
+}
+
+final sessionConfigProvider =
+    StateNotifierProvider<SessionConfigNotifier, SessionConfig>(
+      (ref) => SessionConfigNotifier(),
+    );

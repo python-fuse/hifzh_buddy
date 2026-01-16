@@ -48,3 +48,4 @@ app.*.map.json
 
 # Quran Audio Files
 assets/quranAudio
+assets/pages

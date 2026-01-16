@@ -50,6 +50,7 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
           surahName: surah.englishName,
           ayahNumber: ayahNumber,
           pageNumber: pageNumber,
+          reciterName: ref.read(selectedReciterProvider).englishName,
         );
       } else {
         ref
