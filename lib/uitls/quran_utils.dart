@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hifzh_buddy/models/ayah.dart';
 import 'package:hifzh_buddy/models/surah.dart';
-import 'package:quran_library/quran_library.dart';
 
 /*
 ** QuranUtils
@@ -102,23 +101,23 @@ class QuranUtils {
   ** getPageAyahsFromLibrary
   ** Gets the ayahs of a page from the QuranLibrary package
   */
-  static List<Ayah> getPageAyahsFromLibrary(
-    int pageNumber,
-    List<Surah> surahs,
-  ) {
-    final quranLibPageAyahs = QuranLibrary().getPageAyahsByPageNumber(
-      pageNumber: pageNumber,
-    );
+  // static List<Ayah> getPageAyahsFromLibrary(
+  //   int pageNumber,
+  //   List<Surah> surahs,
+  // ) {
+  //   final quranLibPageAyahs = QuranLibrary().getPageAyahsByPageNumber(
+  //     pageNumber: pageNumber,
+  //   );
 
-    return quranLibPageAyahs
-        .map(
-          (a) => findAyahByUniqueNumber(
-            uniqueNumber: a.ayahUQNumber,
-            surahs: surahs,
-          ),
-        )
-        .toList();
-  }
+  //   return quranLibPageAyahs
+  //       .map(
+  //         (a) => findAyahByUniqueNumber(
+  //           uniqueNumber: a.ayahUQNumber,
+  //           surahs: surahs,
+  //         ),
+  //       )
+  //       .toList();
+  // }
 
   /*
   ** findAyahByUniqueNumber

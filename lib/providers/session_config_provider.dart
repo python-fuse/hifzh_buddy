@@ -10,8 +10,8 @@ class SessionConfigNotifier extends StateNotifier<SessionConfig> {
         SessionConfig(
           startSurah: 1,
           startVerse: 1,
-          endSurah: 1,
-          endVerse: 1,
+          endSurah: 114,
+          endVerse: 6,
           playbackSpeed: 1.0,
           verseReps: 1,
           rangeReps: 1,

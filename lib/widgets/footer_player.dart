@@ -24,6 +24,7 @@ class FooterPlayer extends ConsumerWidget {
 
         return Container(
           width: MediaQuery.of(context).size.width,
+          height: 80,
           padding: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
             color: Theme.of(context).scaffoldBackgroundColor,

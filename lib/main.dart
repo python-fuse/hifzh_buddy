@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hifzh_buddy/providers/audio_handler_provider.dart';
 import 'package:hifzh_buddy/router/router.dart';
 import 'package:hifzh_buddy/theme/theme.dart';
-import 'package:quran_library/quran_library.dart';
 import 'package:hifzh_buddy/service/audio_handler.dart';
+import 'package:audio_service/audio_service.dart';
+import 'package:just_audio/just_audio.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await QuranLibrary.init();
 
   final audioHandler = await AudioService.init(
     builder: () => QuranAudioHandler(AudioPlayer()),

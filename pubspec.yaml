@@ -40,7 +40,6 @@ dependencies:
   just_audio: ^0.10.5
   flutter_screenutil: ^5.9.3
   audio_session: ^0.2.2
-  quran_library: ^2.3.5
   audio_service: ^0.18.18
   qcf_quran: ^0.0.3
   dio: ^5.9.0
@@ -72,7 +71,7 @@ flutter:
   assets:
     - assets/text/quran.json
     # - assets/quranAudio/
-    # - assets/pages/
+    - assets/pages/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

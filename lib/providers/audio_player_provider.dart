@@ -69,11 +69,7 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
     final quranAudioService = ref.read(quranAudioServiceProvider);
     final reciter = ref.read(selectedReciterProvider);
 
-    final audioPath = await quranAudioService.getAudioPath(
-      reciter,
-      ayah,
-      false,
-    );
+    final audioPath = await quranAudioService.getAudioPath(reciter, ayah, true);
 
     if (audioPath.startsWith("http")) {
       return AudioSource.uri(Uri.parse(audioPath));
@@ -96,7 +92,7 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
         .read(currentPlayingVerseProvider.notifier)
         .updateCurrentVerse(null, null);
 
-    _pageAyahs = QuranUtils.getPageAyahsFromLibrary(pageNumber, surahs);
+    _pageAyahs = QuranUtils.getPageAyahs(pageNumber, surahs);
 
     try {
       final audioSources = await Future.wait(

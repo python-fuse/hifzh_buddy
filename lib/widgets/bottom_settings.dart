@@ -64,7 +64,7 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
     );
 
     _endAyahController = WheelPickerController(
-      itemCount: 7,
+      itemCount: 6,
       initialIndex: _currentEndAyahIndex,
     );
 

@@ -2,18 +2,17 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:hifzh_buddy/models/surah.dart';
-import 'package:hifzh_buddy/providers/audio_player_provider.dart';
 import 'package:hifzh_buddy/providers/current_verse_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/providers/session_config_provider.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
 import 'package:hifzh_buddy/widgets/bottom_settings.dart';
 import 'package:hifzh_buddy/widgets/footer_player.dart';
-import 'package:qcf_quran/qcf_quran.dart';
-import 'package:quran_library/quran_library.dart';
+import 'package:hifzh_buddy/widgets/quran_page_view.dart';
 
 class SurahPage extends ConsumerStatefulWidget {
   final int surahNumber;
@@ -53,27 +52,25 @@ class _SurahPageState extends ConsumerState<SurahPage> {
     ).englishName;
 
     void onPageChanged(int page) {
-      final pageData = QuranLibrary().getAllSurahInPageByPageNumber(
-        pageNumber: page,
-      );
+      final pageData = QuranUtils.getAllSurahsByPage(page + 1, surahs);
 
       setState(() {
-        _currentTitle = pageData.first.englishName;
+        _currentTitle = pageData.last.englishName;
       });
 
       // ref.read(audioPlayerProvider.notifier).loadPage(page);
     }
 
-    handleHighlightVerse(surahNumber, verseNumber) {
-      final currentVerse = ref.watch(currentPlayingVerseProvider).ayah;
-      if (currentVerse != null) {
-        if (currentVerse.surahNumber == surahNumber &&
-            currentVerse.numberInSurah == verseNumber) {
-          return Theme.of(context).primaryColor.withAlpha(0x33);
-        }
-      }
-      return null;
-    }
+    // handleHighlightVerse(surahNumber, verseNumber) {
+    //   final currentVerse = ref.watch(currentPlayingVerseProvider).ayah;
+    //   if (currentVerse != null) {
+    //     if (currentVerse.surahNumber == surahNumber &&
+    //         currentVerse.numberInSurah == verseNumber) {
+    //       return Theme.of(context).primaryColor.withAlpha(0x33);
+    //     }
+    //   }
+    //   return null;
+    // }
 
     // void setHighlights() {
     //   final currentVerse = ref.watch(currentPlayingVerseProvider).ayah;
@@ -100,31 +97,23 @@ class _SurahPageState extends ConsumerState<SurahPage> {
     return Scaffold(
       appBar: AppBar(title: Text(_currentTitle!), centerTitle: true),
 
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Consumer(
-              builder: (context, ref, child) => PageviewQuran(
-                initialPageNumber: widget.page,
-                pageBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                verseBackgroundColor: handleHighlightVerse,
+      body: SafeArea(
+        bottom: true,
+        child: Column(
+          children: [
+            Expanded(
+              child: QuranPageView(
+                initialPage: widget.page,
                 onPageChanged: onPageChanged,
                 controller: _pageController,
               ),
             ),
-            // child: QuranPageView(page: widget.page),
-          ),
 
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 80,
-            child: FooterPlayer(
+            FooterPlayer(
               showModal: () => _showSessionSettingsBottomSheet(context),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -164,10 +153,6 @@ class _SurahPageState extends ConsumerState<SurahPage> {
 
     context.pop();
 
-    _pageController.animateToPage(
-      startAyah.page - 1,
-      duration: const Duration(seconds: 1),
-      curve: Curves.easeInOut,
-    );
+    _pageController.jumpToPage(startAyah.page - 1);
   }
 }
