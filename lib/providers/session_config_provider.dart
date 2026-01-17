@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:hifzh_buddy/models/reciter.dart';
 import 'package:hifzh_buddy/models/session_config.dart';
+import 'package:hifzh_buddy/providers/quran_audio_service_provider.dart';
 
 class SessionConfigNotifier extends StateNotifier<SessionConfig> {
-  SessionConfigNotifier()
+  final Reciter reciter;
+  SessionConfigNotifier(this.reciter)
     : super(
-        const SessionConfig(
+        SessionConfig(
           startSurah: 1,
           startVerse: 1,
           endSurah: 1,
@@ -12,6 +15,7 @@ class SessionConfigNotifier extends StateNotifier<SessionConfig> {
           playbackSpeed: 1.0,
           verseReps: 1,
           rangeReps: 1,
+          reciter: reciter,
         ),
       );
 
@@ -46,5 +50,5 @@ class SessionConfigNotifier extends StateNotifier<SessionConfig> {
 
 final sessionConfigProvider =
     StateNotifierProvider<SessionConfigNotifier, SessionConfig>(
-      (ref) => SessionConfigNotifier(),
+      (ref) => SessionConfigNotifier(ref.watch(selectedReciterProvider)),
     );

@@ -1,3 +1,5 @@
+import 'package:hifzh_buddy/models/reciter.dart';
+
 class SessionConfig {
   final int startSurah;
   final int startVerse;
@@ -6,6 +8,7 @@ class SessionConfig {
   final double playbackSpeed;
   final int verseReps;
   final int rangeReps;
+  final Reciter reciter;
 
   const SessionConfig({
     required this.startSurah,
@@ -15,6 +18,7 @@ class SessionConfig {
     required this.playbackSpeed,
     required this.verseReps,
     required this.rangeReps,
+    required this.reciter,
   });
 
   SessionConfig copyWith({
@@ -34,6 +38,7 @@ class SessionConfig {
       playbackSpeed: playbackSpeed ?? this.playbackSpeed,
       verseReps: verseReps ?? this.verseReps,
       rangeReps: rangeReps ?? this.rangeReps,
+      reciter: reciter,
     );
   }
 }

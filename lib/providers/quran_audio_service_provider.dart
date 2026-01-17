@@ -13,9 +13,5 @@ final quranAudioServiceProvider = Provider((ref) {
 });
 
 final selectedReciterProvider = StateProvider((ref) {
-  return Reciter(
-    englishName: "husary",
-    id: "ar.abdulbasitmurattal",
-    name: "huss",
-  );
+  return Reciter.minshawi;
 });

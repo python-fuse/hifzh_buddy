@@ -1,14 +1,20 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hifzh_buddy/models/surah.dart';
+import 'package:hifzh_buddy/providers/audio_player_provider.dart';
+import 'package:hifzh_buddy/providers/quran_audio_service_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/providers/session_config_provider.dart';
 import 'package:hifzh_buddy/theme/theme.dart';
 import 'package:hifzh_buddy/uitls/constants.dart';
+import 'package:hifzh_buddy/widgets/button.dart';
 import 'package:wheel_picker/wheel_picker.dart';
 
 class BottomSettings extends ConsumerStatefulWidget {
-  const BottomSettings({super.key});
+  final VoidCallback onApply;
+  const BottomSettings({super.key, required this.onApply});
 
   @override
   ConsumerState<BottomSettings> createState() => _BottomSettingsState();
@@ -18,9 +24,17 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
   late final WheelPickerController _startSurahController;
   late final WheelPickerController _startAyahController;
 
+  late final WheelPickerController _endSurahController;
+  late final WheelPickerController _endAyahController;
+
+  late final WheelPickerController _reciterController;
+
   // Track current selection ourselves
   int _currentSurahIndex = 0;
   int _currentAyahIndex = 0;
+
+  int _currentEndSurahIndex = 0;
+  int _currentEndAyahIndex = 0;
 
   @override
   void initState() {
@@ -31,6 +45,9 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
     _currentSurahIndex = config.startSurah - 1;
     _currentAyahIndex = config.startVerse - 1;
 
+    _currentEndSurahIndex = config.endSurah - 1;
+    _currentEndAyahIndex = config.endVerse - 1;
+
     _startSurahController = WheelPickerController(
       itemCount: 114,
       initialIndex: _currentSurahIndex,
@@ -39,6 +56,23 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
     _startAyahController = WheelPickerController(
       itemCount: 7,
       initialIndex: _currentAyahIndex,
+    );
+
+    _endSurahController = WheelPickerController(
+      itemCount: 114,
+      initialIndex: _currentEndSurahIndex,
+    );
+
+    _endAyahController = WheelPickerController(
+      itemCount: 7,
+      initialIndex: _currentEndAyahIndex,
+    );
+
+    _reciterController = WheelPickerController(
+      itemCount: reciters.length,
+      initialIndex: reciters.indexWhere(
+        (r) => r.id == ref.read(selectedReciterProvider).id,
+      ),
     );
   }
 
@@ -71,8 +105,16 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
                 SizedBox(
                   height: 100,
                   child: WheelPicker(
+                    controller: _reciterController,
                     looping: false,
                     selectedIndexColor: Theme.of(context).primaryColor,
+                    onIndexChanged: (index, interactionType) {
+                      ref.read(selectedReciterProvider.notifier).state =
+                          reciters[index];
+
+                      log(ref.read(selectedReciterProvider.notifier).state.id);
+                    },
+
                     builder: (context, index) {
                       return Text(
                         reciters[index].englishName,
@@ -81,7 +123,6 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
                         ).textTheme.bodyMedium?.copyWith(fontSize: 18),
                       );
                     },
-                    itemCount: reciters.length,
                   ),
                 ),
               ],
@@ -170,6 +211,35 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
               ],
             ),
 
+            const SizedBox(height: 20),
+
+            SizedBox(
+              width: double.infinity,
+              child: Button(
+                text: "Play",
+                onPressed: () async {
+                  try {
+                    await ref.read(audioPlayerProvider.notifier).loadAudio();
+
+                    final audioState = ref.read(audioPlayerProvider);
+
+                    if (audioState.hasError) {
+                      return;
+                    }
+
+                    final player = ref
+                        .read(audioPlayerProvider.notifier)
+                        .player;
+
+                    player.play();
+
+                    widget.onApply();
+                  } catch (e, stack) {
+                    log(' Error in play button', error: e, stackTrace: stack);
+                  }
+                },
+              ),
+            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -270,7 +340,7 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
               width: 150,
               child: WheelPicker(
                 looping: false,
-                controller: _startSurahController,
+                controller: _endSurahController,
                 selectedIndexColor: primaryColorValue,
                 style: const WheelPickerStyle(surroundingOpacity: 0.6),
                 onIndexChanged: (index, type) {
@@ -279,19 +349,19 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
 
                   // Update our tracked index
                   setState(() {
-                    _currentSurahIndex = index;
-                    _currentAyahIndex = 0;
+                    _currentEndSurahIndex = index;
+                    _currentEndAyahIndex = 0;
                   });
 
                   // Update state
-                  configNotifier.updateStartSurah(
+                  configNotifier.updateEndSurah(
                     surah.number,
+                    maxVerses,
                     // maxVerses,
                   );
 
                   // Reset ayah picker
-                  _startAyahController.itemCount = maxVerses;
-                  // _startAyahController.selected = 0;
+                  _endAyahController.itemCount = maxVerses;
                 },
                 builder: (context, index) {
                   return Text(
@@ -312,15 +382,15 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
               width: 100,
               child: WheelPicker(
                 key: ValueKey('ayah_$_currentSurahIndex'),
-                controller: _startAyahController,
+                controller: _endAyahController,
                 selectedIndexColor: primaryColorValue,
                 style: const WheelPickerStyle(surroundingOpacity: 0.6),
                 looping: false,
                 onIndexChanged: (index, type) {
                   setState(() {
-                    _currentAyahIndex = index;
+                    _currentEndAyahIndex = index;
                   });
-                  configNotifier.updateStartVerse(index + 1);
+                  configNotifier.updateEndVerse(index + 1);
                 },
                 builder: (context, index) {
                   return Text(
@@ -340,6 +410,9 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
   void dispose() {
     _startSurahController.dispose();
     _startAyahController.dispose();
+    _endSurahController.dispose();
+    _endAyahController.dispose();
+    _reciterController.dispose();
     super.dispose();
   }
 }

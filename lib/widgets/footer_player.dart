@@ -59,6 +59,7 @@ class FooterPlayer extends ConsumerWidget {
               PlayButton(
                 onTap: () => isPlaying ? player.pause() : player.play(),
                 isPlaying: isPlaying && !isCompleted,
+                isLoading: player.processingState == ProcessingState.loading,
               ),
             ],
           ),

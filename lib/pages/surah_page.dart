@@ -1,10 +1,14 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hifzh_buddy/providers/audio_player_provider.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:hifzh_buddy/models/surah.dart';
+import 'package:hifzh_buddy/providers/audio_player_provider.dart';
 import 'package:hifzh_buddy/providers/current_verse_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
+import 'package:hifzh_buddy/providers/session_config_provider.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
 import 'package:hifzh_buddy/widgets/bottom_settings.dart';
 import 'package:hifzh_buddy/widgets/footer_player.dart';
@@ -23,13 +27,21 @@ class SurahPage extends ConsumerStatefulWidget {
 
 class _SurahPageState extends ConsumerState<SurahPage> {
   String? _currentTitle;
+  late PageController _pageController;
 
   @override
   void initState() {
-    Future.microtask(() {
-      ref.read(audioPlayerProvider.notifier).loadPage(widget.page);
-    });
+    _pageController = PageController(initialPage: widget.page - 1);
+    // Future.microtask(() {
+    //   ref.read(audioPlayerProvider.notifier).loadPage(widget.page);
+    // });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -49,7 +61,7 @@ class _SurahPageState extends ConsumerState<SurahPage> {
         _currentTitle = pageData.first.englishName;
       });
 
-      ref.read(audioPlayerProvider.notifier).loadPage(page);
+      // ref.read(audioPlayerProvider.notifier).loadPage(page);
     }
 
     handleHighlightVerse(surahNumber, verseNumber) {
@@ -97,6 +109,7 @@ class _SurahPageState extends ConsumerState<SurahPage> {
                 pageBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 verseBackgroundColor: handleHighlightVerse,
                 onPageChanged: onPageChanged,
+                controller: _pageController,
               ),
             ),
             // child: QuranPageView(page: widget.page),
@@ -136,8 +149,25 @@ class _SurahPageState extends ConsumerState<SurahPage> {
       ),
 
       builder: (BuildContext context) {
-        return BottomSettings();
+        return BottomSettings(onApply: () => onApply(context));
       },
+    );
+  }
+
+  void onApply(BuildContext context) {
+    log("called on apply");
+    final startAyah = QuranUtils.getAyah(
+      ref.read(sessionConfigProvider).startSurah,
+      ref.read(sessionConfigProvider).startVerse,
+      ref.read(surahsProvider).value!,
+    );
+
+    context.pop();
+
+    _pageController.animateToPage(
+      startAyah.page - 1,
+      duration: const Duration(seconds: 1),
+      curve: Curves.easeInOut,
     );
   }
 }

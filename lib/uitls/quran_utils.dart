@@ -46,6 +46,20 @@ class QuranUtils {
     return surahs.firstWhere((s) => s.number == surahNumber);
   }
 
+  static Ayah getAyah(int surahNumber, int ayahNumber, List<Surah> surahs) {
+    return surahs
+        .firstWhere((s) => s.number == surahNumber)
+        .ayahs
+        .firstWhere((a) => a.numberInSurah == ayahNumber);
+  }
+
+  static Ayah getAyahByGlobalNumber(int globalNumber, List<Surah> surahs) {
+    return surahs
+        .firstWhere((s) => s.ayahs.any((a) => a.globalNumber == globalNumber))
+        .ayahs
+        .firstWhere((a) => a.globalNumber == globalNumber);
+  }
+
   /*
   ** getSurahAyahs
   ** Gets the ayahs of a surah

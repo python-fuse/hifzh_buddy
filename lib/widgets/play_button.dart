@@ -3,8 +3,14 @@ import 'package:flutter/material.dart';
 class PlayButton extends StatefulWidget {
   final VoidCallback onTap;
   final bool isPlaying;
+  final bool isLoading;
 
-  const PlayButton({super.key, required this.onTap, required this.isPlaying});
+  const PlayButton({
+    super.key,
+    required this.onTap,
+    required this.isPlaying,
+    required this.isLoading,
+  });
 
   @override
   State<PlayButton> createState() => _PlayButtonState();
@@ -42,7 +48,20 @@ class _PlayButtonState extends State<PlayButton> {
             ),
           ],
         ),
-        child: widget.isPlaying
+        child: widget.isLoading
+            ? SizedBox(
+                height: 20,
+                width: 20,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    value: null,
+
+                    strokeWidth: 2,
+                  ),
+                ),
+              )
+            : widget.isPlaying
             ? Icon(Icons.pause, color: Colors.white, size: 30)
             : Icon(Icons.play_arrow, color: Colors.white, size: 30),
       ),
