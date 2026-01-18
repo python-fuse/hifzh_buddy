@@ -8,9 +8,9 @@ class SplashScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final surahsAsync = ref.watch(surahsProvider);
+    final bootAsync = ref.watch(bootProvider);
 
-    return surahsAsync.when(
+    return bootAsync.when(
       data: (_) {
         if (context.mounted) {
           // ignore: use_build_context_synchronously

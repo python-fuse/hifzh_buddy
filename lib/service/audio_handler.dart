@@ -11,13 +11,14 @@ class QuranAudioHandler extends BaseAudioHandler {
 
   void updateNowPlaying({
     required String surahName,
+    required int surahNumber,
     required int ayahNumber,
     required int pageNumber,
     required String reciterName,
   }) {
     final mediaItem = MediaItem(
       id: '$surahName:$ayahNumber',
-      title: "$surahName - $ayahNumber ",
+      title: "$surahName - $surahNumber ",
       album: surahName,
       artist: reciterName,
     );

@@ -2,13 +2,13 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:hifzh_buddy/models/surah.dart';
-import 'package:hifzh_buddy/providers/current_verse_provider.dart';
+import 'package:hifzh_buddy/providers/coordinates_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/providers/session_config_provider.dart';
+import 'package:hifzh_buddy/uitls/coordinates_utils.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
 import 'package:hifzh_buddy/widgets/bottom_settings.dart';
 import 'package:hifzh_buddy/widgets/footer_player.dart';
@@ -31,9 +31,6 @@ class _SurahPageState extends ConsumerState<SurahPage> {
   @override
   void initState() {
     _pageController = PageController(initialPage: widget.page - 1);
-    // Future.microtask(() {
-    //   ref.read(audioPlayerProvider.notifier).loadPage(widget.page);
-    // });
     super.initState();
   }
 
@@ -61,42 +58,7 @@ class _SurahPageState extends ConsumerState<SurahPage> {
       // ref.read(audioPlayerProvider.notifier).loadPage(page);
     }
 
-    // handleHighlightVerse(surahNumber, verseNumber) {
-    //   final currentVerse = ref.watch(currentPlayingVerseProvider).ayah;
-    //   if (currentVerse != null) {
-    //     if (currentVerse.surahNumber == surahNumber &&
-    //         currentVerse.numberInSurah == verseNumber) {
-    //       return Theme.of(context).primaryColor.withAlpha(0x33);
-    //     }
-    //   }
-    //   return null;
-    // }
-
-    // void setHighlights() {
-    //   final currentVerse = ref.watch(currentPlayingVerseProvider).ayah;
-    //   Map<int, List<int>> toBeHighlighted = {};
-    //   if (currentVerse != null) {
-    //     toBeHighlighted = {
-    //       currentVerse.surahNumber: [currentVerse.numberInSurah],
-    //     };
-    //   }
-
-    //   final combined = List<int>.empty(growable: true);
-    //   toBeHighlighted.forEach((surah, ayahs) {
-    //     for (final n in ayahs) {
-    //       final id = QuranCtrl.instance.getAyahUQBySurahAndAyah(surah, n);
-    //       if (id != null) combined.add(id);
-    //     }
-    //   });
-
-    //   QuranCtrl.instance.setExternalHighlights(combined);
-    // }
-
-    // setHighlights();
-
     return Scaffold(
-      appBar: AppBar(title: Text(_currentTitle!), centerTitle: true),
-
       body: SafeArea(
         bottom: true,
         child: Column(
