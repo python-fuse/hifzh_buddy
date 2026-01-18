@@ -70,7 +70,11 @@ class AudioPlayerNotifier extends StateNotifier<AsyncValue<void>> {
     final quranAudioService = ref.read(quranAudioServiceProvider);
     final reciter = ref.read(selectedReciterProvider);
 
-    final audioPath = await quranAudioService.getAudioPath(reciter, ayah, true);
+    final audioPath = await quranAudioService.getAudioPath(
+      reciter,
+      ayah,
+      false,
+    );
 
     if (audioPath.startsWith("http")) {
       return AudioSource.uri(Uri.parse(audioPath));

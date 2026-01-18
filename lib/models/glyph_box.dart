@@ -6,6 +6,7 @@ class GlyphBox {
   final int minY;
   final int maxX;
   final int maxY;
+  final int lineNumber;
 
   GlyphBox({
     required this.position,
@@ -13,16 +14,18 @@ class GlyphBox {
     required this.minY,
     required this.maxX,
     required this.maxY,
+    required this.lineNumber,
   });
 
   // Parsing from my restructured json [pos,minx,maxx,miny,maxy]
   factory GlyphBox.fromList(List<dynamic> list) {
     return GlyphBox(
       position: list[0] as int,
-      minX: list[1] as int,
-      minY: list[2] as int,
+      lineNumber: list[1] as int,
+      minX: list[2] as int,
       maxX: list[3] as int,
-      maxY: list[4] as int,
+      minY: list[4] as int,
+      maxY: list[5] as int,
     );
   }
 

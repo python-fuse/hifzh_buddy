@@ -3,12 +3,12 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hifzh_buddy/models/glyph_box.dart';
 
 import 'package:hifzh_buddy/models/surah.dart';
-import 'package:hifzh_buddy/providers/coordinates_provider.dart';
+import 'package:hifzh_buddy/providers/current_verse_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/providers/session_config_provider.dart';
-import 'package:hifzh_buddy/uitls/coordinates_utils.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
 import 'package:hifzh_buddy/widgets/bottom_settings.dart';
 import 'package:hifzh_buddy/widgets/footer_player.dart';
@@ -43,10 +43,26 @@ class _SurahPageState extends ConsumerState<SurahPage> {
   @override
   Widget build(BuildContext context) {
     final List<Surah> surahs = ref.watch(surahsProvider).value!;
+    final currentVerse = ref.watch(currentPlayingVerseProvider);
+    final coordinates = ref.watch(coordinatesProvider).value!;
+
     _currentTitle ??= QuranUtils.getSurah(
       widget.surahNumber,
       surahs,
     ).englishName;
+
+    // Build a map of pageNumber -> glyphs for the current verse, using surah and ayah from the currentPlayingVerse
+    Map<int, List<GlyphBox>>? highlightedGlyphsByPage;
+    if (currentVerse.ayah != null) {
+      final verseKey =
+          '${currentVerse.ayah!.surahNumber}_${currentVerse.ayah!.numberInSurah}';
+      highlightedGlyphsByPage = {};
+      coordinates.forEach((pageNum, verseMap) {
+        if (verseMap.containsKey(verseKey)) {
+          highlightedGlyphsByPage![pageNum] = verseMap[verseKey]!;
+        }
+      });
+    }
 
     void onPageChanged(int page) {
       final pageData = QuranUtils.getAllSurahsByPage(page + 1, surahs);
@@ -68,6 +84,14 @@ class _SurahPageState extends ConsumerState<SurahPage> {
                 initialPage: widget.page,
                 onPageChanged: onPageChanged,
                 controller: _pageController,
+                // Pass a function to get highlights for a specific page
+                getHighlightedGlyphsForPage: (int pageNumber) {
+                  if (highlightedGlyphsByPage != null &&
+                      highlightedGlyphsByPage.containsKey(pageNumber)) {
+                    return highlightedGlyphsByPage[pageNumber];
+                  }
+                  return null;
+                },
               ),
             ),
 
