@@ -77,11 +77,16 @@ class _QuranPageViewState extends ConsumerState<QuranPageView> {
                 Positioned.fill(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      double scale = constraints.maxWidth / 1206;
+                      // Use both width and height for scaling
+                      const double originalWidth = 1260;
+                      const double originalHeight = 2038;
+                      double scaleX = constraints.maxWidth / originalWidth;
+                      double scaleY = constraints.maxHeight / originalHeight;
 
                       return CustomPaint(
                         painter: AyahHighlightPainter(
-                          scaleFactor: scale,
+                          scaleX: scaleX,
+                          scaleY: scaleY,
                           highlightColor: Theme.of(
                             context,
                           ).primaryColor.withAlpha(0x22),

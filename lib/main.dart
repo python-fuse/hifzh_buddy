@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hifzh_buddy/providers/audio_handler_provider.dart';
@@ -9,6 +10,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 
 Future<void> main() async {
+  dotenv.load();
   WidgetsFlutterBinding.ensureInitialized();
 
   final audioHandler = await AudioService.init(

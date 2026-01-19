@@ -4,12 +4,14 @@ class PlayButton extends StatefulWidget {
   final VoidCallback onTap;
   final bool isPlaying;
   final bool isLoading;
+  final bool isReplay;
 
   const PlayButton({
     super.key,
     required this.onTap,
     required this.isPlaying,
     required this.isLoading,
+    this.isReplay = false,
   });
 
   @override
@@ -56,13 +58,14 @@ class _PlayButtonState extends State<PlayButton> {
                   child: CircularProgressIndicator(
                     color: Colors.white,
                     value: null,
-
                     strokeWidth: 2,
                   ),
                 ),
               )
             : widget.isPlaying
             ? Icon(Icons.pause, color: Colors.white, size: 30)
+            : widget.isReplay
+            ? Icon(Icons.replay, color: Colors.white, size: 30)
             : Icon(Icons.play_arrow, color: Colors.white, size: 30),
       ),
     );

@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hifzh_buddy/models/glyph_box.dart';
 
 import 'package:hifzh_buddy/models/surah.dart';
@@ -10,7 +9,6 @@ import 'package:hifzh_buddy/providers/current_verse_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/providers/session_config_provider.dart';
 import 'package:hifzh_buddy/uitls/quran_utils.dart';
-import 'package:hifzh_buddy/widgets/bottom_settings.dart';
 import 'package:hifzh_buddy/widgets/footer_player.dart';
 import 'package:hifzh_buddy/widgets/quran_page_view.dart';
 
@@ -32,6 +30,21 @@ class _SurahPageState extends ConsumerState<SurahPage> {
   void initState() {
     _pageController = PageController(initialPage: widget.page - 1);
     super.initState();
+
+    // Sync session config to the opened surah on first load
+    Future.microtask(() {
+      final configNotifier = ref.read(sessionConfigProvider.notifier);
+      final surahs = ref.read(surahsProvider).value;
+      int maxAyah = 1;
+      if (surahs != null) {
+        final surah = surahs.firstWhere((s) => s.number == widget.surahNumber);
+        maxAyah = surah.ayahs.length;
+      }
+      configNotifier.updateStartSurah(widget.surahNumber);
+      configNotifier.updateStartVerse(1);
+      configNotifier.updateEndSurah(widget.surahNumber, maxAyah);
+      configNotifier.updateEndVerse(maxAyah);
+    });
   }
 
   @override
@@ -45,6 +58,7 @@ class _SurahPageState extends ConsumerState<SurahPage> {
     final List<Surah> surahs = ref.watch(surahsProvider).value!;
     final currentVerse = ref.watch(currentPlayingVerseProvider);
     final coordinates = ref.watch(coordinatesProvider).value!;
+    int currentSurahNumber = widget.surahNumber;
 
     _currentTitle ??= QuranUtils.getSurah(
       widget.surahNumber,
@@ -69,6 +83,8 @@ class _SurahPageState extends ConsumerState<SurahPage> {
 
       setState(() {
         _currentTitle = pageData.last.englishName;
+        currentSurahNumber = page + 1;
+        log("c -> $currentSurahNumber");
       });
 
       // ref.read(audioPlayerProvider.notifier).loadPage(page);
@@ -77,6 +93,7 @@ class _SurahPageState extends ConsumerState<SurahPage> {
     return Scaffold(
       body: SafeArea(
         bottom: true,
+        top: true,
         child: Column(
           children: [
             Expanded(
@@ -95,50 +112,10 @@ class _SurahPageState extends ConsumerState<SurahPage> {
               ),
             ),
 
-            FooterPlayer(
-              showModal: () => _showSessionSettingsBottomSheet(context),
-            ),
+            FooterPlayer(currentSurah: currentSurahNumber),
           ],
         ),
       ),
     );
-  }
-
-  void _showSessionSettingsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      isDismissible: true,
-      showDragHandle: true,
-      elevation: 1,
-      useSafeArea: true,
-      sheetAnimationStyle: AnimationStyle(
-        curve: Curves.bounceInOut,
-        duration: const Duration(milliseconds: 400),
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(8),
-          topRight: Radius.circular(8),
-        ),
-      ),
-
-      builder: (BuildContext context) {
-        return BottomSettings(onApply: () => onApply(context));
-      },
-    );
-  }
-
-  void onApply(BuildContext context) {
-    log("called on apply");
-    final startAyah = QuranUtils.getAyah(
-      ref.read(sessionConfigProvider).startSurah,
-      ref.read(sessionConfigProvider).startVerse,
-      ref.read(surahsProvider).value!,
-    );
-
-    context.pop();
-
-    _pageController.jumpToPage(startAyah.page - 1);
   }
 }

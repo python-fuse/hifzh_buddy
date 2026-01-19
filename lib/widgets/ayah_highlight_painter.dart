@@ -3,13 +3,15 @@ import 'package:hifzh_buddy/models/glyph_box.dart';
 
 class AyahHighlightPainter extends CustomPainter {
   final List<GlyphBox>? glyphs;
-  final double scaleFactor;
+  final double scaleX;
+  final double scaleY;
   final Color highlightColor;
 
   AyahHighlightPainter({
     super.repaint,
     this.glyphs,
-    required this.scaleFactor,
+    required this.scaleX,
+    required this.scaleY,
     required this.highlightColor,
   });
 
@@ -28,17 +30,21 @@ class AyahHighlightPainter extends CustomPainter {
     }
 
     for (final lineGlyphs in glyphsByLine.values) {
-      // First, get the bounding box in image coordinates
+      // Get the bounding box in image coordinates
       final rect = _createLineBoundingBox(lineGlyphs);
-      // Scale the bounding box to screen coordinates
-      final scaledRect = rect.scale(scaleFactor);
-      // Apply asymmetric padding: small margin on top, extra padding on bottom
+      // Scale the bounding box to screen coordinates using scaleX and scaleY
+      final scaledRect = Rect.fromLTRB(
+        rect.left * scaleX,
+        rect.top * scaleY,
+        rect.right * scaleX,
+        rect.bottom * scaleY,
+      );
+      // Apply padding AFTER scaling for tight fit
       const double leftRightPadding = 2;
-      const double topMargin = 3;
-      const double bottomPadding = 6;
+      const double bottomPadding = 4;
       final paddedRect = Rect.fromLTRB(
         scaledRect.left - leftRightPadding,
-        scaledRect.top - topMargin,
+        scaledRect.top,
         scaledRect.right + leftRightPadding,
         scaledRect.bottom + bottomPadding,
       );
@@ -69,17 +75,7 @@ class AyahHighlightPainter extends CustomPainter {
   bool shouldRepaint(AyahHighlightPainter oldDelegate) {
     return oldDelegate.glyphs != glyphs ||
         oldDelegate.highlightColor != highlightColor ||
-        oldDelegate.scaleFactor != scaleFactor;
-  }
-}
-
-extension RectScaling on Rect {
-  Rect scale(double factor) {
-    return Rect.fromLTRB(
-      left * factor,
-      top * factor,
-      right * factor,
-      bottom * factor,
-    );
+        oldDelegate.scaleX != scaleX ||
+        oldDelegate.scaleY != scaleY;
   }
 }

@@ -2,37 +2,42 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hifzh_buddy/models/surah.dart';
 import 'package:hifzh_buddy/providers/audio_player_provider.dart';
 import 'package:hifzh_buddy/providers/quran_audio_service_provider.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
 import 'package:hifzh_buddy/providers/session_config_provider.dart';
-import 'package:hifzh_buddy/theme/theme.dart';
 import 'package:hifzh_buddy/uitls/constants.dart';
 import 'package:hifzh_buddy/widgets/button.dart';
-import 'package:wheel_picker/wheel_picker.dart';
 
 class BottomSettings extends ConsumerStatefulWidget {
   final VoidCallback onApply;
-  const BottomSettings({super.key, required this.onApply});
+  final int? initialStartSurah;
+  final int? initialStartVerse;
+  final int? initialEndSurah;
+  final int? initialEndVerse;
+  const BottomSettings({
+    super.key,
+    required this.onApply,
+    this.initialStartSurah,
+    this.initialStartVerse,
+    this.initialEndSurah,
+    this.initialEndVerse,
+  });
 
   @override
   ConsumerState<BottomSettings> createState() => _BottomSettingsState();
 }
 
 class _BottomSettingsState extends ConsumerState<BottomSettings> {
-  late final WheelPickerController _startSurahController;
-  late final WheelPickerController _startAyahController;
+  late FixedExtentScrollController _startSurahController;
+  late FixedExtentScrollController _startAyahController;
+  late FixedExtentScrollController _endSurahController;
+  late FixedExtentScrollController _endAyahController;
 
-  late final WheelPickerController _endSurahController;
-  late final WheelPickerController _endAyahController;
+  late FixedExtentScrollController _reciterController;
 
-  late final WheelPickerController _reciterController;
-
-  // Track current selection ourselves
   int _currentSurahIndex = 0;
   int _currentAyahIndex = 0;
-
   int _currentEndSurahIndex = 0;
   int _currentEndAyahIndex = 0;
 
@@ -40,40 +45,44 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
   void initState() {
     super.initState();
 
-    final config = ref.read(sessionConfigProvider);
+    Future.microtask(() {
+      // Read config value from provider, not from StateNotifier.state
+      final config = ref.read(sessionConfigProvider);
+      final configNotifier = ref.read(sessionConfigProvider.notifier);
 
-    _currentSurahIndex = config.startSurah - 1;
-    _currentAyahIndex = config.startVerse - 1;
+      _currentSurahIndex = (widget.initialStartSurah ?? config.startSurah) - 1;
+      _currentAyahIndex = (widget.initialStartVerse ?? config.startVerse) - 1;
+      _currentEndSurahIndex = (widget.initialEndSurah ?? config.endSurah) - 1;
+      _currentEndAyahIndex = (widget.initialEndVerse ?? config.endVerse) - 1;
 
-    _currentEndSurahIndex = config.endSurah - 1;
-    _currentEndAyahIndex = config.endVerse - 1;
+      // Immediately sync the config to the UI
+      configNotifier.updateStartSurah(_currentSurahIndex + 1);
+      configNotifier.updateStartVerse(_currentAyahIndex + 1);
+      configNotifier.updateEndSurah(
+        _currentEndSurahIndex + 1,
+        _currentEndAyahIndex + 1,
+      );
+      configNotifier.updateEndVerse(_currentEndAyahIndex + 1);
 
-    _startSurahController = WheelPickerController(
-      itemCount: 114,
-      initialIndex: _currentSurahIndex,
-    );
+      _startSurahController = FixedExtentScrollController(
+        initialItem: _currentSurahIndex,
+      );
+      _startAyahController = FixedExtentScrollController(
+        initialItem: _currentAyahIndex,
+      );
+      _endSurahController = FixedExtentScrollController(
+        initialItem: _currentEndSurahIndex,
+      );
+      _endAyahController = FixedExtentScrollController(
+        initialItem: _currentEndAyahIndex,
+      );
 
-    _startAyahController = WheelPickerController(
-      itemCount: 7,
-      initialIndex: _currentAyahIndex,
-    );
-
-    _endSurahController = WheelPickerController(
-      itemCount: 114,
-      initialIndex: _currentEndSurahIndex,
-    );
-
-    _endAyahController = WheelPickerController(
-      itemCount: 6,
-      initialIndex: _currentEndAyahIndex,
-    );
-
-    _reciterController = WheelPickerController(
-      itemCount: reciters.length,
-      initialIndex: reciters.indexWhere(
-        (r) => r.id == ref.read(selectedReciterProvider).id,
-      ),
-    );
+      _reciterController = FixedExtentScrollController(
+        initialItem: reciters.indexWhere(
+          (r) => r.id == ref.read(selectedReciterProvider).id,
+        ),
+      );
+    });
   }
 
   @override
@@ -84,6 +93,9 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
 
     if (surahs == null) return const CircularProgressIndicator();
 
+    final maxStartAyahs = surahs[_currentSurahIndex].ayahs.length;
+    final maxEndAyahs = surahs[_currentEndSurahIndex].ayahs.length;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SingleChildScrollView(
@@ -91,38 +103,40 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-
             Text(
               "Session Settings",
               style: Theme.of(context).textTheme.titleLarge,
             ),
-
             const SizedBox(height: 20),
+
+            // Reciter Picker
             Column(
               children: [
                 Text("Reciter", style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 10),
                 SizedBox(
                   height: 100,
-                  child: WheelPicker(
+                  child: ListWheelScrollView.useDelegate(
                     controller: _reciterController,
-                    looping: false,
-                    selectedIndexColor: Theme.of(context).primaryColor,
-                    onIndexChanged: (index, interactionType) {
+                    itemExtent: 40,
+                    magnification: 1.1,
+                    useMagnifier: true,
+                    onSelectedItemChanged: (index) {
                       ref.read(selectedReciterProvider.notifier).state =
                           reciters[index];
-
                       log(ref.read(selectedReciterProvider.notifier).state.id);
                     },
-
-                    builder: (context, index) {
-                      return Text(
-                        reciters[index].englishName,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.copyWith(fontSize: 18),
-                      );
-                    },
+                    childDelegate: ListWheelChildBuilderDelegate(
+                      builder: (context, index) {
+                        return Text(
+                          reciters[index].englishName,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(fontSize: 18),
+                        );
+                      },
+                      childCount: reciters.length,
+                    ),
                   ),
                 ),
               ],
@@ -137,13 +151,167 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
             Text("Start", style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 10),
 
-            _buildStartRange(surahs, configNotifier),
+            // Start Range Pickers
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // Start Surah
+                Column(
+                  children: [
+                    const Text("Surah"),
+                    SizedBox(
+                      height: 120,
+                      width: 150,
+                      child: ListWheelScrollView.useDelegate(
+                        controller: _startSurahController,
+                        itemExtent: 40,
+                        magnification: 1.1,
+                        useMagnifier: true,
+                        onSelectedItemChanged: (index) {
+                          final surah = surahs[index];
+                          final maxVerses = surah.ayahs.length;
+                          setState(() {
+                            _currentSurahIndex = index;
+                            _currentAyahIndex = 0;
+                            _startAyahController.jumpToItem(0);
+
+                            // When start surah changes, update end surah and end ayah to match this surah's end
+                            _currentEndSurahIndex = index;
+                            _currentEndAyahIndex = maxVerses - 1;
+                            _endSurahController.jumpToItem(index);
+                            _endAyahController.jumpToItem(maxVerses - 1);
+                          });
+
+                          configNotifier.updateStartSurah(index + 1);
+                          configNotifier.updateStartVerse(1);
+                          configNotifier.updateEndSurah(index + 1, maxVerses);
+                          configNotifier.updateEndVerse(maxVerses);
+                        },
+                        childDelegate: ListWheelChildBuilderDelegate(
+                          builder: (context, index) {
+                            return Text(
+                              surahs[index].englishName,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            );
+                          },
+                          childCount: surahs.length,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                // Start Ayah
+                Column(
+                  children: [
+                    const Text("Verse"),
+                    SizedBox(
+                      height: 120,
+                      width: 100,
+                      child: ListWheelScrollView.useDelegate(
+                        controller: _startAyahController,
+                        itemExtent: 40,
+                        magnification: 1.1,
+                        useMagnifier: true,
+                        onSelectedItemChanged: (index) {
+                          setState(() {
+                            _currentAyahIndex = index;
+                          });
+                          configNotifier.updateStartVerse(index + 1);
+                        },
+                        childDelegate: ListWheelChildBuilderDelegate(
+                          builder: (context, index) {
+                            return Text(
+                              '${index + 1}',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            );
+                          },
+                          childCount: maxStartAyahs,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
 
             const SizedBox(height: 20),
             Text("End", style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 10),
 
-            _buildEndRange(surahs, configNotifier),
+            // End Range Pickers
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // End Surah
+                Column(
+                  children: [
+                    const Text("Surah"),
+                    SizedBox(
+                      height: 120,
+                      width: 150,
+                      child: ListWheelScrollView.useDelegate(
+                        controller: _endSurahController,
+                        itemExtent: 40,
+                        magnification: 1.1,
+                        useMagnifier: true,
+                        onSelectedItemChanged: (index) {
+                          final surah = surahs[index];
+                          final maxVerses = surah.ayahs.length;
+                          setState(() {
+                            _currentEndSurahIndex = index;
+                            _currentEndAyahIndex = maxVerses - 1;
+                            _endAyahController.jumpToItem(maxVerses - 1);
+                          });
+                          configNotifier.updateEndSurah(index + 1, maxVerses);
+                          configNotifier.updateEndVerse(maxVerses);
+                        },
+                        childDelegate: ListWheelChildBuilderDelegate(
+                          builder: (context, index) {
+                            return Text(
+                              surahs[index].englishName,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            );
+                          },
+                          childCount: surahs.length,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                // End Ayah
+                Column(
+                  children: [
+                    const Text("Verse"),
+                    SizedBox(
+                      height: 120,
+                      width: 100,
+                      child: ListWheelScrollView.useDelegate(
+                        controller: _endAyahController,
+                        itemExtent: 40,
+                        magnification: 1.1,
+                        useMagnifier: true,
+                        onSelectedItemChanged: (index) {
+                          setState(() {
+                            _currentEndAyahIndex = index;
+                          });
+                          configNotifier.updateEndVerse(index + 1);
+                        },
+                        childDelegate: ListWheelChildBuilderDelegate(
+                          builder: (context, index) {
+                            return Text(
+                              '${index + 1}',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            );
+                          },
+                          childCount: maxEndAyahs,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
             const SizedBox(height: 20),
 
             // Speed Section
@@ -167,7 +335,6 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
             Text("Per verse", style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 10),
             Row(
-              spacing: 3,
               children: [
                 for (int i in [1, 2, 3, -1]) // -1 for loop
                   Expanded(
@@ -192,7 +359,6 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
             Text("Per range", style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 10),
             Row(
-              spacing: 3,
               children: [
                 for (int i in [1, 2, 3, -1])
                   Expanded(
@@ -244,165 +410,6 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
           ],
         ),
       ),
-    );
-  }
-
-  Row _buildStartRange(
-    List<Surah> surahs,
-    SessionConfigNotifier configNotifier,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Column(
-          children: [
-            const Text("Surah"),
-            SizedBox(
-              height: 120,
-              width: 150,
-              child: WheelPicker(
-                looping: false,
-                controller: _startSurahController,
-                selectedIndexColor: primaryColorValue,
-                style: const WheelPickerStyle(surroundingOpacity: 0.6),
-                onIndexChanged: (index, type) {
-                  final surah = surahs[index];
-                  final maxVerses = surah.ayahs.length;
-
-                  // Update our tracked index
-                  setState(() {
-                    _currentSurahIndex = index;
-                    _currentAyahIndex = 0;
-                  });
-
-                  // Update state
-                  configNotifier.updateStartSurah(
-                    surah.number,
-                    // maxVerses,
-                  );
-
-                  // Reset ayah picker
-                  _startAyahController.itemCount = maxVerses;
-                  // _startAyahController.selected = 0;
-                },
-                builder: (context, index) {
-                  return Text(
-                    surahs[index].englishName,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-
-        Column(
-          children: [
-            const Text("Verse"),
-            SizedBox(
-              height: 120,
-              width: 100,
-              child: WheelPicker(
-                key: ValueKey('ayah_$_currentSurahIndex'),
-                controller: _startAyahController,
-                selectedIndexColor: primaryColorValue,
-                style: const WheelPickerStyle(surroundingOpacity: 0.6),
-                looping: false,
-                onIndexChanged: (index, type) {
-                  setState(() {
-                    _currentAyahIndex = index;
-                  });
-                  configNotifier.updateStartVerse(index + 1);
-                },
-                builder: (context, index) {
-                  return Text(
-                    '${index + 1}',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Row _buildEndRange(List<Surah> surahs, SessionConfigNotifier configNotifier) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Column(
-          children: [
-            const Text("Surah"),
-            SizedBox(
-              height: 120,
-              width: 150,
-              child: WheelPicker(
-                looping: false,
-                controller: _endSurahController,
-                selectedIndexColor: primaryColorValue,
-                style: const WheelPickerStyle(surroundingOpacity: 0.6),
-                onIndexChanged: (index, type) {
-                  final surah = surahs[index];
-                  final maxVerses = surah.ayahs.length;
-
-                  // Update our tracked index
-                  setState(() {
-                    _currentEndSurahIndex = index;
-                    _currentEndAyahIndex = 0;
-                  });
-
-                  // Update state
-                  configNotifier.updateEndSurah(
-                    surah.number,
-                    maxVerses,
-                    // maxVerses,
-                  );
-
-                  // Reset ayah picker
-                  _endAyahController.itemCount = maxVerses;
-                },
-                builder: (context, index) {
-                  return Text(
-                    surahs[index].englishName,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-
-        Column(
-          children: [
-            const Text("Verse"),
-            SizedBox(
-              height: 120,
-              width: 100,
-              child: WheelPicker(
-                key: ValueKey('ayah_$_currentSurahIndex'),
-                controller: _endAyahController,
-                selectedIndexColor: primaryColorValue,
-                style: const WheelPickerStyle(surroundingOpacity: 0.6),
-                looping: false,
-                onIndexChanged: (index, type) {
-                  setState(() {
-                    _currentEndAyahIndex = index;
-                  });
-                  configNotifier.updateEndVerse(index + 1);
-                },
-                builder: (context, index) {
-                  return Text(
-                    '${index + 1}',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
