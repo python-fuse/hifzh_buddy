@@ -23,7 +23,7 @@ class AyahHighlightPainter extends CustomPainter {
       ..color = highlightColor
       ..style = PaintingStyle.fill;
 
-    // Group glyphs by lineNumber for cleaner logic
+    // Group glyphs by lineNumber
     final Map<int, List<GlyphBox>> glyphsByLine = {};
     for (final glyph in glyphs!) {
       glyphsByLine.putIfAbsent(glyph.lineNumber, () => []).add(glyph);
@@ -39,7 +39,7 @@ class AyahHighlightPainter extends CustomPainter {
         rect.right * scaleX,
         rect.bottom * scaleY,
       );
-      // Apply padding AFTER scaling for tight fit
+
       const double leftRightPadding = 2;
       const double bottomPadding = 4;
       final paddedRect = Rect.fromLTRB(
