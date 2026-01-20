@@ -45,9 +45,25 @@ class DownloadManagerPage extends StatelessWidget {
                       return ListTile(
                         title: Text(reciter.englishName),
                         leading: Icon(Icons.multitrack_audio),
-                        subtitle: LinearProgressIndicator(
-                          value: progress,
-                          borderRadius: BorderRadius.circular(8),
+                        subtitle: Flex(
+                          direction: Axis.horizontal,
+                          spacing: 10,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              flex: 1,
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            Flexible(
+                              flex: 0,
+                              child: Text(
+                                "${(progress * (144 / 100)).toStringAsFixed(2)} %",
+                              ),
+                            ),
+                          ],
                         ),
                         trailing: Icon(Icons.arrow_forward_ios),
                         contentPadding: EdgeInsets.symmetric(

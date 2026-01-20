@@ -6,6 +6,7 @@ import 'package:hifzh_buddy/pages/settings_page.dart';
 import 'package:hifzh_buddy/pages/splash_screen.dart';
 import 'package:hifzh_buddy/pages/surah_page.dart';
 import 'package:hifzh_buddy/pages/surahs_list_page.dart';
+import 'package:hifzh_buddy/uitls/constants.dart';
 
 final appRouter = GoRouter(
   routes: [
@@ -19,7 +20,9 @@ final appRouter = GoRouter(
       path: "/downloads/:reciterId",
       builder: (ctx, state) {
         final reciterId = state.pathParameters['reciterId'];
-        return ReciterResourcesPage(reciterId: reciterId ?? "");
+        final reciter = reciters.firstWhere((r) => r.id == reciterId);
+
+        return ReciterResourcesPage(reciter: reciter);
       },
     ),
     GoRoute(

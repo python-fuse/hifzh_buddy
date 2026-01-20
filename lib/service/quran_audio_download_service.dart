@@ -67,4 +67,8 @@ class QuranDownloadService {
 
     return filesInPath.listSync().map((e) => File(e.path)).toList();
   }
+
+  int getAyahNumberFromFilePath(File file) {
+    return int.parse(file.path.split('/').last.split('.').first);
+  }
 }
