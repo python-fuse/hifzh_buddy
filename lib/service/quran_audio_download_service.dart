@@ -71,4 +71,13 @@ class QuranDownloadService {
   int getAyahNumberFromFilePath(File file) {
     return int.parse(file.path.split('/').last.split('.').first);
   }
+
+  Future<File> getFileFromAyahNumber(Reciter reciter, Ayah ayah) async {
+    String path = await _getFullCachePath(reciter, ayah);
+    return File(path);
+  }
+
+  Future<void> deleteFile(File file) async {
+    await file.delete();
+  }
 }

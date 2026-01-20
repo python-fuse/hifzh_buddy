@@ -29,51 +29,81 @@ class DownloadManagerPage extends StatelessWidget {
                     builder: (context, asyncSnapshot) {
                       if (asyncSnapshot.connectionState ==
                           ConnectionState.waiting) {
-                        return ListTile(
-                          title: Text(reciter.englishName),
-                          leading: Icon(Icons.multitrack_audio),
-                          subtitle: LinearProgressIndicator(
-                            value: null,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                        return Center(
+                          child: CircularProgressIndicator.adaptive(),
                         );
                       }
 
                       final files = asyncSnapshot.data ?? [];
                       final progress = files.length / 6236;
 
-                      return ListTile(
-                        title: Text(reciter.englishName),
-                        leading: Icon(Icons.multitrack_audio),
-                        subtitle: Flex(
-                          direction: Axis.horizontal,
-                          spacing: 10,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              flex: 1,
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                borderRadius: BorderRadius.circular(8),
+                      return InkWell(
+                        onTap: () => context.push('/downloads/${reciter.id}'),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0),
+                          child: Row(
+                            children: [
+                              // 1. Leading Number Icon
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    index.toString().padLeft(2, '0'),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                            Flexible(
-                              flex: 0,
-                              child: Text(
-                                "${(progress * (144 / 100)).toStringAsFixed(2)} %",
-                              ),
-                            ),
-                          ],
-                        ),
-                        trailing: Icon(Icons.arrow_forward_ios),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 2,
-                          vertical: 0,
-                        ),
+                              const SizedBox(width: 16),
 
-                        onTap: () {
-                          context.push("/downloads/${reciter.id}");
-                        },
+                              // 2. Main Content Area
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Title and Size Row
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          reciter.englishName,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+
+                                    // Progress Bar
+                                    LinearProgressIndicator(
+                                      value: progress,
+                                      minHeight: 4,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    const SizedBox(height: 4),
+
+                                    // Download Count Text
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     },
                   );
