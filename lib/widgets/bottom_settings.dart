@@ -45,44 +45,47 @@ class _BottomSettingsState extends ConsumerState<BottomSettings> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      // Read config value from provider, not from StateNotifier.state
-      final config = ref.read(sessionConfigProvider);
-      final configNotifier = ref.read(sessionConfigProvider.notifier);
+    // Initialize controllers with default values
+    _startSurahController = FixedExtentScrollController(initialItem: 0);
+    _startAyahController = FixedExtentScrollController(initialItem: 0);
+    _endSurahController = FixedExtentScrollController(initialItem: 0);
+    _endAyahController = FixedExtentScrollController(initialItem: 0);
+    _reciterController = FixedExtentScrollController(initialItem: 0);
+  }
 
+  bool _hasInitialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!_hasInitialized) {
+      _hasInitialized = true;
+
+      final config = ref.read(sessionConfigProvider);
+
+      // Calculate initial positions (READ only, no WRITE)
       _currentSurahIndex = (widget.initialStartSurah ?? config.startSurah) - 1;
       _currentAyahIndex = (widget.initialStartVerse ?? config.startVerse) - 1;
       _currentEndSurahIndex = (widget.initialEndSurah ?? config.endSurah) - 1;
       _currentEndAyahIndex = (widget.initialEndVerse ?? config.endVerse) - 1;
 
-      // Immediately sync the config to the UI
-      configNotifier.updateStartSurah(_currentSurahIndex + 1);
-      configNotifier.updateStartVerse(_currentAyahIndex + 1);
-      configNotifier.updateEndSurah(
-        _currentEndSurahIndex + 1,
-        _currentEndAyahIndex + 1,
-      );
-      configNotifier.updateEndVerse(_currentEndAyahIndex + 1);
+      // Jump controllers to correct positions
+      _startSurahController.jumpToItem(_currentSurahIndex);
+      _startAyahController.jumpToItem(_currentAyahIndex);
+      _endSurahController.jumpToItem(_currentEndSurahIndex);
+      _endAyahController.jumpToItem(_currentEndAyahIndex);
 
-      _startSurahController = FixedExtentScrollController(
-        initialItem: _currentSurahIndex,
+      final reciterIndex = reciters.indexWhere(
+        (r) => r.id == ref.read(selectedReciterProvider).id,
       );
-      _startAyahController = FixedExtentScrollController(
-        initialItem: _currentAyahIndex,
-      );
-      _endSurahController = FixedExtentScrollController(
-        initialItem: _currentEndSurahIndex,
-      );
-      _endAyahController = FixedExtentScrollController(
-        initialItem: _currentEndAyahIndex,
-      );
+      if (reciterIndex >= 0) {
+        _reciterController.jumpToItem(reciterIndex);
+      }
 
-      _reciterController = FixedExtentScrollController(
-        initialItem: reciters.indexWhere(
-          (r) => r.id == ref.read(selectedReciterProvider).id,
-        ),
-      );
-    });
+      // DO NOT update the provider here - just read from it
+      // The provider already has the correct state, we're just syncing the UI to it
+    }
   }
 
   @override

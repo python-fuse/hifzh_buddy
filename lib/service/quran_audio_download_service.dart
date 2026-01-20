@@ -35,6 +35,8 @@ class QuranDownloadService {
         }
       },
     );
+
+    log("Downloaded $url to $savePath");
   }
 
   // Check if file is already cached
@@ -50,7 +52,19 @@ class QuranDownloadService {
     final dir = await getApplicationDocumentsDirectory();
     final fullPath =
         '${dir.path}/${reciter.getCachedAudiopath(ayah.globalNumber)}';
-    log('Cache path: $fullPath'); // Add this
     return fullPath;
+  }
+
+  Future<List<File>> getReciterFiles(Reciter reciter) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final reciterFilesPath = '${dir.path}/quran_audio/${reciter.id}';
+
+    final filesInPath = await Directory(
+      reciterFilesPath,
+    ).create(recursive: true);
+
+    log("Total: ${filesInPath.listSync().length}");
+
+    return filesInPath.listSync().map((e) => File(e.path)).toList();
   }
 }

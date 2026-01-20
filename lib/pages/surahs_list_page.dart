@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hifzh_buddy/providers/quran_data_provider.dart';
+import 'package:hifzh_buddy/widgets/my_appbar.dart';
 import 'package:hifzh_buddy/widgets/pages_list.dart';
 import 'package:hifzh_buddy/widgets/search_input.dart';
 import 'package:hifzh_buddy/widgets/surah_list.dart';
@@ -14,12 +15,7 @@ class SurahsListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('All Surahs'),
-        centerTitle: true,
-        actions: [IconButton(icon: Icon(Icons.search), onPressed: () {})],
-        scrolledUnderElevation: 0,
-      ),
+      appBar: MyAppBar(title: 'All Surahs'),
 
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
